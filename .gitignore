@@ -16,13 +16,14 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 
-# Environment variables
-.env
-.env.local
+# Virtual Environment
+venv/
+ENV/
 
 # IDE
 .idea/
@@ -30,8 +31,10 @@ var/
 *.swp
 *.swo
 
-# Virtual environment
-venv/
+# Local state files
+court_states.json
+known_dates.json
+*.bak
 
-# Logs
-*.log
+# Environment variables
+.env

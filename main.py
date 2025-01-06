@@ -1,13 +1,13 @@
 import logging
-import schedule
 import time
+import schedule
 from src.config import Config
 from src.court_checker import CourtChecker
-from src.notifier import EmailNotifier
+from src.email_notifier import EmailNotifier
 
 # Configuration du logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,  # Changé en DEBUG pour plus de détails
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
@@ -17,56 +17,88 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-class PadelNotifier:
-    def __init__(self):
-        self.checker = CourtChecker()
-        self.notifier = EmailNotifier()
-        self.config = Config
-        
-    def check_and_notify(self):
-        """Vérifie les disponibilités et envoie des notifications si nécessaire"""
-        try:
-            # Vérifier les créneaux disponibles
-            available_slots = self.checker.check_availability()
-            
-            # Envoyer une notification pour chaque créneau disponible
-            for time, court, date in available_slots:
-                self.notifier.send_notification(time, court, date)
-                
-        except Exception as e:
-            logger.error(f"Erreur lors de la vérification des créneaux: {str(e)}")
+def main():
+    logger.info("Démarrage du service de notification Padel...")
     
-    def run(self):
-        """Lance le service de notification"""
-        try:
-            # Valider la configuration
-            self.config.validate()
+    config = Config()
+    checker = CourtChecker(config)
+    notifier = EmailNotifier(config)
+    
+    logger.info("Tentative de connexion au site...")
+    if not checker.login():
+        logger.error("Échec de la connexion")
+        return
+    
+    logger.info("Lancement de la première vérification...")
+    check_and_notify(checker, notifier)
+    
+    schedule.every(config.CHECK_INTERVAL).minutes.do(
+        lambda: check_and_notify(checker, notifier)
+    )
+    
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+def check_and_notify(checker: CourtChecker, notifier: EmailNotifier):
+    """Vérifie les disponibilités et envoie une notification si nécessaire"""
+    try:
+        # Vérifier toutes les dates disponibles
+        available_slots, new_dates = checker.check_all_dates()
+        
+        if available_slots or new_dates:
+            # Grouper les créneaux par date
+            slots_by_date = {}
+            for time, court, date in available_slots:
+                if date not in slots_by_date:
+                    slots_by_date[date] = []
+                slots_by_date[date].append((time, court))
             
-            # Se connecter au site
-            if not self.checker.login():
-                raise Exception("Impossible de se connecter au site")
+            # Construire le message
+            message_parts = []
             
-            # Programmer les vérifications périodiques
-            schedule.every(self.config.CHECK_INTERVAL).minutes.do(self.check_and_notify)
+            # Annoncer les nouvelles dates en premier
+            if new_dates:
+                message_parts.append("🎉 NOUVELLES DATES DISPONIBLES ! 🎉")
+                message_parts.append("Les dates suivantes viennent d'être ouvertes :")
+                for date in new_dates:
+                    message_parts.append(f"- {date}")
+                message_parts.append("\nDétails des créneaux disponibles :")
             
-            # Première vérification immédiate
-            self.check_and_notify()
+            # Ajouter les créneaux disponibles
+            if slots_by_date:
+                if new_dates:
+                    message_parts.append("\nCréneaux disponibles :")
+                else:
+                    message_parts.append("Nouveaux créneaux disponibles !")
+                    
+                for date, slots in slots_by_date.items():
+                    message_parts.append(f"\nPour le {date} :")
+                    for time, court in sorted(slots):
+                        message_parts.append(f"- {court} à {time}")
             
-            logger.info(f"Service démarré - Vérification toutes les {self.config.CHECK_INTERVAL} minutes")
+            message = "\n".join(message_parts)
             
-            # Boucle principale
-            while True:
-                schedule.run_pending()
-                time.sleep(60)
+            # Envoyer la notification
+            subject = "🎾 "
+            if new_dates:
+                subject += "NOUVELLES DATES "
+            if slots_by_date:
+                subject += "Créneaux Padel disponibles !"
+            else:
+                subject += "Planning Padel mis à jour !"
                 
-        except Exception as e:
-            logger.error(f"Erreur fatale: {str(e)}")
-            raise
+            notifier.send_notification(
+                subject=subject,
+                message=message
+            )
+    except Exception as e:
+        logger.error(f"Erreur lors de la vérification : {str(e)}")
 
 if __name__ == "__main__":
-    try:
-        notifier = PadelNotifier()
-        notifier.run()
-    except Exception as e:
-        logger.error(f"Le service s'est arrêté: {str(e)}")
-        raise
+    logging.basicConfig(
+        level=logging.DEBUG,  
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    main()
