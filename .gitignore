@@ -30,5 +30,8 @@ var/
 *.swp
 *.swo
 
+# Virtual environment
+venv/
+
 # Logs
 *.log
