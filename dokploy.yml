@@ -1,0 +1,22 @@
+name: padel-notifier
+image: padel-notifier
+type: docker
+
+env:
+  - PADEL_USERNAME
+  - PADEL_PASSWORD
+  - SITE_URL
+  - LOGIN_URL
+  - PLANNING_URL
+  - NOTIFICATION_EMAIL
+  - SMTP_USERNAME
+  - SMTP_PASSWORD
+  - TARGET_TIME
+  - CHECK_INTERVAL
+
+build:
+  context: .
+  dockerfile: Dockerfile
+
+healthcheck:
+  type: process
