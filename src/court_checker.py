@@ -2,7 +2,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 import json
 import os
 import locale
@@ -35,9 +35,19 @@ class CourtChecker:
         # Charger les dates connues
         self._load_known_dates()
         
-        # Headers pour simuler un navigateur
+        # Headers pour simuler un navigateur moderne
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0'
         })
 
     def _load_states(self) -> Dict:
@@ -199,7 +209,7 @@ class CourtChecker:
         """Se connecte au site"""
         try:
             # Récupérer la page de login
-            response = self.session.get(self.config.LOGIN_URL)
+            response = self.session.get(self.config.SITE_URL + "/membre", verify=True)
             response.raise_for_status()
             
             # Log du contenu HTML pour debug
@@ -208,37 +218,75 @@ class CourtChecker:
             
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Trouver le formulaire de login
-            login_form = soup.find('form', {'id': 'login-form'})
+            # Trouver le formulaire de login (qui n'a pas d'ID spécifique)
+            login_form = soup.find('form')
             if not login_form:
                 logger.error("Formulaire de login non trouvé")
+                logger.debug("Contenu de la page :")
+                logger.debug(soup.prettify()[:500])
                 return False
             
-            # Extraire le token CSRF si présent
-            csrf_token = None
-            csrf_input = login_form.find('input', {'name': '_csrf_token'})
-            if csrf_input:
-                csrf_token = csrf_input.get('value')
-                logger.debug("Token CSRF trouvé")
+            # Debug des champs du formulaire
+            logger.debug("Champs du formulaire trouvés :")
+            for input_field in login_form.find_all('input'):
+                logger.debug(f"Input field: name={input_field.get('name', 'N/A')}, type={input_field.get('type', 'N/A')}")
+            
+            # Extraire l'URL de soumission du formulaire
+            form_action = login_form.get('action', '')
+            if not form_action:
+                form_action = "/membre"
+            login_url = urljoin(self.config.SITE_URL, form_action)
+            logger.debug(f"URL de soumission du formulaire : {login_url}")
             
             # Préparer les données de login
-            login_data = {
-                '_username': self.config.PADEL_USERNAME,
-                '_password': self.config.PADEL_PASSWORD
+            login_data = {}
+            
+            # Ajouter tous les champs cachés du formulaire
+            for hidden_field in login_form.find_all('input', type='hidden'):
+                login_data[hidden_field.get('name')] = hidden_field.get('value', '')
+            
+            # Ajouter les identifiants en utilisant les noms de champs exacts
+            login_data['_username'] = self.config.USERNAME
+            login_data['_password'] = self.config.PASSWORD
+            
+            logger.debug(f"Données de login préparées (sans le mot de passe) : {dict((k,v) for k,v in login_data.items() if k != '_password')}")
+            
+            # Ajouter le Referer pour plus d'authenticité
+            headers = {
+                'Origin': self.config.SITE_URL,
+                'Referer': response.url,
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
-            if csrf_token:
-                login_data['_csrf_token'] = csrf_token
             
             # Envoyer le formulaire
-            login_response = self.session.post(self.config.LOGIN_URL, data=login_data)
-            login_response.raise_for_status()
+            try:
+                login_response = self.session.post(
+                    login_url,
+                    data=login_data,
+                    headers=headers,
+                    verify=True,
+                    allow_redirects=True
+                )
+                login_response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                logger.error(f"Erreur HTTP lors du login : {str(e)}")
+                logger.debug("Contenu de la réponse d'erreur :")
+                logger.debug(e.response.text[:500])
+                raise
             
-            # Vérifier si la connexion a réussi
-            if "membre/planning" in login_response.url or "Welcome" in login_response.text:
+            # Debug de la réponse
+            logger.debug(f"Status code de la réponse : {login_response.status_code}")
+            logger.debug(f"URL finale après login : {login_response.url}")
+            
+            # Vérifier si la connexion a réussi en essayant d'accéder au planning
+            test_response = self.session.get(self.config.PLANNING_URL)
+            if "/membre/planning" in test_response.url:
                 logger.info("Connexion réussie")
                 return True
             else:
-                logger.error(f"Échec de la connexion. URL de redirection : {login_response.url}")
+                logger.error(f"Échec de la connexion. URL de redirection : {test_response.url}")
+                logger.debug("Contenu de la réponse :")
+                logger.debug(login_response.text[:500])
                 return False
             
         except Exception as e:
@@ -288,7 +336,7 @@ class CourtChecker:
                 
                 # Vérifier les disponibilités pour cette date
                 for target_time in (target_times or self.config.TARGET_TIMES):
-                    available_slots = self.check_availability(target_time)
+                    available_slots = self.check_availability(target_time, date)
                     if available_slots:
                         all_available_slots.extend(available_slots)
                         if date not in self.known_dates:
@@ -301,13 +349,14 @@ class CourtChecker:
             logger.error(f"Erreur lors de la vérification des dates : {str(e)}")
             return [], []
 
-    def check_availability(self, target_time: str = None) -> List[Tuple[str, str, str]]:
+    def check_availability(self, target_time: str = None, planning_date: Optional[str] = None) -> List[Tuple[str, str, str]]:
         """
         Vérifie la disponibilité des terrains et ne retourne que les nouveaux créneaux disponibles
         
         Args:
             target_time (str, optional): Heure cible (ex: "11H00"). 
                                        Si None, utilise la config
+            planning_date (str, optional): Date du planning (format: "YYYY-MM-DD")
         
         Returns:
             List[Tuple[str, str, str]]: Liste de tuples (heure, numéro de terrain, date)
@@ -323,83 +372,73 @@ class CourtChecker:
         try:
             logger.info(f"Vérification des disponibilités pour {target_time_site_format}...")
             
-            # Vérifier si nous devons nous reconnecter
-            response = self.session.get(self.config.PLANNING_URL)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            # Construire l'URL avec la date si spécifiée
+            url = self.config.PLANNING_URL
+            if planning_date:
+                # Convertir la date au format DD-MM-YYYY
+                try:
+                    date_obj = datetime.strptime(planning_date, "%A %d %B %Y")
+                    formatted_date = date_obj.strftime("%d-%m-%Y")
+                    url += f"?date={formatted_date}"
+                except ValueError as e:
+                    logger.error(f"Erreur lors de la conversion de la date '{planning_date}': {str(e)}")
+                    return
             
-            # Si on est redirigé vers la page de login
-            if "/membre/login" in response.url:
-                logger.info("Session expirée, reconnexion...")
-                if not self._login():
-                    logger.error("Échec de la reconnexion")
-                    return []
-                response = self.session.get(self.config.PLANNING_URL)
-                soup = BeautifulSoup(response.text, 'html.parser')
-            
+            # Récupérer la page du planning
+            response = self.session.get(url)
             response.raise_for_status()
             
-            # Chercher la table qui contient les créneaux
-            planning_table = soup.find('table', {'class': 'table-planning'})
-            if not planning_table:
-                logger.error("Page de planning non trouvée")
-                return []
+            # Parser la page
+            soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Récupérer la date du planning
-            date = self._extract_date(soup)
-            if not date:
+            # Extraire la date du planning
+            date_text = self._extract_date(soup)
+            if not date_text:
                 logger.error("Impossible de trouver la date du planning")
-                return []
-                
+                return
+            
+            # Convertir la date en objet datetime
             try:
-                # Convertir la date française en format ISO
-                date_obj = datetime.strptime(date, "%A %d %B %Y")
-                date_iso = date_obj.strftime("%Y-%m-%d")
-                logger.info(f"Date du planning : {date} ({date_iso})")
+                date_obj = datetime.strptime(date_text, "%A %d %B %Y")
+                logger.info(f"Date du planning : {date_text} ({date_obj.strftime('%Y-%m-%d')})")
             except ValueError as e:
-                logger.error(f"Erreur lors de la conversion de la date '{date}': {str(e)}")
-                return []
+                logger.error(f"Erreur lors de la conversion de la date '{date_text}': {str(e)}")
+                return
             
-            # Récupérer les états précédents pour cette date
-            previous_states_for_date = self.previous_states.get(date_iso, {})
+            # Vérifier les disponibilités pour l'horaire demandé
+            available_slots = self._find_available_slots(soup, target_time)
             
-            slots = soup.select('tr')
-            
-            for slot in slots:
-                time_cell = slot.select_one('th')
-                if not time_cell:
-                    continue
-                    
-                time = time_cell.text.strip()
-                if time != target_time_site_format:
-                    continue
+            # Si des créneaux sont disponibles, vérifier s'ils sont nouveaux
+            if available_slots:
+                state_key = f"{date_obj.strftime('%Y-%m-%d')}_{target_time}"
+                if state_key not in self.previous_states:
+                    self.previous_states[state_key] = []
                 
-                courts = slot.select('td')
+                # Identifier les nouveaux créneaux
+                new_slots = []
+                for slot in available_slots:
+                    if slot not in self.previous_states[state_key]:
+                        new_slots.append(slot)
+                        self.previous_states[state_key].append(slot)
                 
-                for i, court in enumerate(courts, 1):
-                    court_classes = court.get('class', [])
-                    court_id = (time, f"Padel {i}")
-                    is_available = self._is_court_available(court_classes)
-                    
-                    # Enregistrer l'état actuel
-                    current_states[court_id] = "libre" if is_available else "occupé"
-                    
-                    # Vérifier si le terrain était précédemment occupé et est maintenant libre
-                    was_occupied = previous_states_for_date.get(court_id) == "occupé"
-                    if is_available and was_occupied:
-                        newly_available_slots.append((time, f"Padel {i}", date))
-                        logger.info(f"Nouveau créneau disponible : Terrain {i} à {time}")
-                    
-            # Mettre à jour les états précédents et sauvegarder
-            self.previous_states[date_iso] = current_states
-            self._save_states(current_states, date_iso)
-            
-            if not newly_available_slots:
-                logger.debug(f"Aucun nouveau créneau disponible pour {target_time_site_format}")
+                # Sauvegarder l'état
+                self._save_states()
+                
+                # Si de nouveaux créneaux sont disponibles, envoyer une notification
+                if new_slots:
+                    message = f"Nouveaux créneaux disponibles pour {target_time} le {date_text} :\n"
+                    message += "\n".join([f"- {slot}" for slot in new_slots])
+                    logger.info(message)
+                    self.notifier.send_notification("Créneaux Padel disponibles !", message)
+                else:
+                    logger.debug(f"Aucun nouveau créneau disponible pour {target_time}")
+            else:
+                logger.debug(f"Aucun nouveau créneau disponible pour {target_time}")
             
             return newly_available_slots
             
         except Exception as e:
-            logger.error(f"Erreur lors de la vérification des disponibilités: {str(e)}")
+            logger.error(f"Erreur lors de la vérification des disponibilités : {str(e)}")
             return []
 
     def _is_court_available(self, court_classes):
@@ -411,12 +450,12 @@ class CourtChecker:
         try:
             # Essayer différents sélecteurs possibles pour trouver le titre
             selectors = [
-                '.table-planning--title',
                 '.planning--title',
+                '.table-planning--title',
                 'h2',
                 '.title',
-                '.table-planning thead th',  # Nouveau sélecteur pour l'en-tête du tableau
-                'th.planning-title'  # Autre possibilité pour l'en-tête
+                '.table-planning thead th',
+                'th.planning-title'
             ]
             
             # Liste des mois en français pour la détection
@@ -433,29 +472,37 @@ class CourtChecker:
                     text = element.get_text().strip().lower()
                     # Si le texte contient un mois français
                     if any(mois in text for mois in mois_fr):
-                        logger.debug(f"Date trouvée avec le sélecteur {selector}: {text}")
-                        return text
+                        # Extraire la partie après "planning padel du"
+                        if "planning padel du" in text:
+                            date_text = text.split("planning padel du")[1].strip()
+                        else:
+                            date_text = text.strip()
+                        logger.debug(f"Date trouvée avec le sélecteur {selector}: {date_text}")
+                        return date_text
             
             # Si rien n'a fonctionné, chercher dans tout le texte
             full_text = soup.get_text().lower()
             
-            # Chercher un motif de date (ex: "lundi 06 janvier 2025" ou "06 janvier 2025")
+            # Chercher un motif de date
             date_patterns = [
-                r'\d{1,2}\s+(?:' + '|'.join(mois_fr) + r')\s+\d{4}',  # 06 janvier 2025
-                r'(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+\d{1,2}\s+(?:' + '|'.join(mois_fr) + r')\s+\d{4}'  # lundi 06 janvier 2025
+                r'planning padel du\s+(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+\d{1,2}\s+(?:' + '|'.join(mois_fr) + r')\s+\d{4}',
+                r'(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+\d{1,2}\s+(?:' + '|'.join(mois_fr) + r')\s+\d{4}',
+                r'\d{1,2}\s+(?:' + '|'.join(mois_fr) + r')\s+\d{4}'
             ]
             
             for pattern in date_patterns:
                 match = re.search(pattern, full_text)
                 if match:
                     date_text = match.group(0)
+                    if "planning padel du" in date_text:
+                        date_text = date_text.split("planning padel du")[1].strip()
                     logger.debug(f"Date trouvée avec pattern dans le texte: {date_text}")
                     return date_text
             
             # Si on arrive ici, aucune date n'a été trouvée
             logger.error("Aucune date trouvée dans la page")
             logger.debug("Contenu de la page :")
-            logger.debug(full_text[:500])  # Log les 500 premiers caractères pour debug
+            logger.debug(full_text[:500])
             return ""
             
         except Exception as e:
@@ -518,3 +565,43 @@ class CourtChecker:
         except Exception as e:
             logger.error(f"Erreur lors de l'extraction de la date de l'URL {url}: {str(e)}")
         return None
+
+    def _find_available_slots(self, soup: BeautifulSoup, target_time: str) -> List[str]:
+        """
+        Trouve les créneaux disponibles pour un horaire donné
+        
+        Args:
+            soup (BeautifulSoup): Objet BeautifulSoup représentant la page du planning
+            target_time (str): Heure cible (ex: "11H00")
+        
+        Returns:
+            List[str]: Liste des créneaux disponibles pour l'horaire donné
+        """
+        available_slots = []
+        
+        # Chercher la table qui contient les créneaux
+        planning_table = soup.find('table', {'class': 'table-planning'})
+        if not planning_table:
+            logger.error("Page de planning non trouvée")
+            return []
+        
+        # Récupérer les lignes de la table
+        rows = planning_table.find_all('tr')
+        
+        for row in rows:
+            time_cell = row.select_one('th')
+            if not time_cell:
+                continue
+            
+            time = time_cell.text.strip()
+            if time != target_time:
+                continue
+            
+            courts = row.select('td')
+            
+            for i, court in enumerate(courts, 1):
+                court_classes = court.get('class', [])
+                if self._is_court_available(court_classes):
+                    available_slots.append(f"Padel {i}")
+        
+        return available_slots

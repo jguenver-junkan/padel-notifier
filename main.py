@@ -18,27 +18,40 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def main():
-    logger.info("Démarrage du service de notification Padel...")
-    
-    config = Config()
-    checker = CourtChecker(config)
-    notifier = EmailNotifier(config)
-    
-    logger.info("Tentative de connexion au site...")
-    if not checker.login():
-        logger.error("Échec de la connexion")
-        return
-    
-    logger.info("Lancement de la première vérification...")
-    check_and_notify(checker, notifier)
-    
-    schedule.every(config.CHECK_INTERVAL).minutes.do(
-        lambda: check_and_notify(checker, notifier)
-    )
-    
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    """Point d'entrée principal"""
+    try:
+        logger.info("Démarrage du service de notification Padel...")
+        
+        # Initialisation
+        config = Config()
+        config.validate()
+        
+        checker = CourtChecker(config)
+        notifier = EmailNotifier(config)
+        
+        # Connexion initiale
+        logger.info("Tentative de connexion au site...")
+        checker._login()
+        
+        # Première vérification immédiate
+        logger.info("Lancement de la première vérification...")
+        check_and_notify(checker, notifier)
+        
+        # Planification des vérifications suivantes
+        schedule.every(config.CHECK_INTERVAL).minutes.do(
+            check_and_notify, checker=checker, notifier=notifier
+        )
+        
+        # Boucle principale
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+            
+    except Exception as e:
+        logger.error(f"Erreur dans la boucle principale: {str(e)}")
+        if hasattr(e, 'response'):
+            logger.error(f"Response status: {e.response.status_code}")
+            logger.error(f"Response content: {e.response.text[:500]}...")
 
 def check_and_notify(checker: CourtChecker, notifier: EmailNotifier):
     """Vérifie les disponibilités et envoie une notification si nécessaire"""
