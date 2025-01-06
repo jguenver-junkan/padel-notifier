@@ -1,4 +1,5 @@
 import os
+from typing import List
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,7 +22,10 @@ class Config:
     SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
 
     # Monitoring settings
-    TARGET_TIME = os.getenv('TARGET_TIME', '11:00')
+    TARGET_TIMES = [
+        time.strip() 
+        for time in os.getenv('TARGET_TIMES', '11H00').split(',')
+    ]
     CHECK_INTERVAL = int(os.getenv('CHECK_INTERVAL', 5))  # minutes
 
     @classmethod
@@ -35,3 +39,14 @@ class Config:
         
         if missing:
             raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+            
+        # Valider le format des horaires
+        for time in cls.TARGET_TIMES:
+            if not time.endswith('H00'):
+                raise ValueError(f"Invalid time format: {time}. Must end with 'H00'")
+            try:
+                hour = int(time[:-3])
+                if not (0 <= hour <= 23):
+                    raise ValueError(f"Invalid hour: {hour}. Must be between 0 and 23")
+            except ValueError as e:
+                raise ValueError(f"Invalid time format: {time}. {str(e)}")

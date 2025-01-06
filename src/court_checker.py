@@ -259,12 +259,111 @@ class CourtChecker:
         """Vérifie si un terrain est disponible en fonction de ses classes CSS"""
         return any('libre' in class_name for class_name in court_classes)
 
+    def check_all_dates(self, target_times: List[str] = None) -> Tuple[List[Tuple[str, str, str]], List[str]]:
+        """
+        Vérifie la disponibilité des terrains pour toutes les dates disponibles
+        
+        Args:
+            target_times (List[str], optional): Liste des heures cibles (ex: ["11H00", "20H00"]). 
+                                              Si None, utilise la config
+        
+        Returns:
+            Tuple[List[Tuple[str, str, str]], List[str]]: 
+                - Liste de tuples (heure, numéro de terrain, date)
+                - Liste des nouvelles dates détectées
+        """
+        all_available_slots = []
+        new_dates_found = []
+        
+        try:
+            # Récupérer la première page de planning
+            response = self.session.get(self.config.PLANNING_URL)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Extraire toutes les URLs de planning
+            planning_urls = self._get_planning_urls(soup)
+            logger.info(f"Vérification de {len(planning_urls)} dates")
+            
+            # Collecter toutes les dates disponibles
+            current_dates = set()
+            for url in planning_urls:
+                date = self._extract_date_from_url(url)
+                if date:
+                    current_dates.add(date)
+            
+            # Vérifier les nouvelles dates
+            known_dates = set()
+            for month_dates in self.known_dates.values():
+                known_dates.update(month_dates)
+            
+            new_dates = current_dates - known_dates
+            if new_dates:
+                logger.info(f"Nouvelles dates détectées : {sorted(new_dates)}")
+                new_dates_found = sorted(new_dates)
+            
+            # Mettre à jour les dates connues
+            self._save_known_dates(list(current_dates))
+            
+            # Utiliser les horaires de la config si non spécifiés
+            if target_times is None:
+                target_times = self.config.TARGET_TIMES
+            
+            # Vérifier chaque URL
+            for url in planning_urls:
+                logger.debug(f"Vérification de l'URL: {url}")
+                date = self._extract_date_from_url(url)
+                
+                # Si c'est une nouvelle date, on la traite en priorité
+                if date in new_dates:
+                    logger.info(f"Vérification prioritaire de la nouvelle date : {date}")
+                
+                # Sauvegarder l'URL originale
+                original_url = self.config.PLANNING_URL
+                try:
+                    # Remplacer temporairement l'URL
+                    self.config.PLANNING_URL = url
+                    
+                    # Vérifier chaque horaire pour cette date
+                    for target_time in target_times:
+                        available_slots = self.check_availability(target_time)
+                        if available_slots:
+                            # Pour les nouvelles dates, on considère tous les créneaux comme "nouveaux"
+                            if date in new_dates:
+                                all_slots = []
+                                soup = BeautifulSoup(response.text, 'html.parser')
+                                slots = soup.select('tr')
+                                for slot in slots:
+                                    time_cell = slot.select_one('th')
+                                    if not time_cell:
+                                        continue
+                                    time = time_cell.text.strip()
+                                    if time != target_time:
+                                        continue
+                                    courts = slot.select('td')
+                                    for i, court in enumerate(courts, 1):
+                                        court_classes = court.get('class', [])
+                                        if self._is_court_available(court_classes):
+                                            all_slots.append((time, f"Padel {i}", date))
+                                all_available_slots.extend(all_slots)
+                            else:
+                                all_available_slots.extend(available_slots)
+                finally:
+                    # Restaurer l'URL originale
+                    self.config.PLANNING_URL = original_url
+            
+            return all_available_slots, new_dates_found
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la vérification de toutes les dates: {str(e)}")
+            return [], []
+
     def check_availability(self, target_time: str = None) -> List[Tuple[str, str, str]]:
         """
         Vérifie la disponibilité des terrains et ne retourne que les nouveaux créneaux disponibles
         
         Args:
-            target_time (str, optional): Heure cible (ex: "11:00"). 
+            target_time (str, optional): Heure cible (ex: "11H00"). 
                                        Si None, utilise la config
         
         Returns:
@@ -272,9 +371,9 @@ class CourtChecker:
                                        Ne contient que les terrains nouvellement disponibles
         """
         if target_time is None:
-            target_time = self.config.TARGET_TIME
+            target_time = self.config.TARGET_TIMES[0]  # Utiliser le premier horaire par défaut
             
-        target_time_site_format = target_time.replace(':', 'H')
+        target_time_site_format = target_time  # Le format est déjà bon maintenant (11H00)
         newly_available_slots = []
         current_states = {}
 
@@ -443,95 +542,3 @@ class CourtChecker:
         except Exception as e:
             logger.error(f"Erreur lors de l'extraction de la date de l'URL {url}: {str(e)}")
         return None
-
-    def check_all_dates(self, target_time: str = None) -> List[Tuple[str, str, str]]:
-        """
-        Vérifie la disponibilité des terrains pour toutes les dates disponibles
-        
-        Args:
-            target_time (str, optional): Heure cible (ex: "11:00"). 
-                                       Si None, utilise la config
-        
-        Returns:
-            List[Tuple[str, str, str]]: Liste de tuples (heure, numéro de terrain, date)
-                                       Ne contient que les terrains nouvellement disponibles
-        """
-        all_available_slots = []
-        new_dates_found = []
-        
-        try:
-            # Récupérer la première page de planning
-            response = self.session.get(self.config.PLANNING_URL)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Extraire toutes les URLs de planning
-            planning_urls = self._get_planning_urls(soup)
-            logger.info(f"Vérification de {len(planning_urls)} dates")
-            
-            # Collecter toutes les dates disponibles
-            current_dates = set()
-            for url in planning_urls:
-                date = self._extract_date_from_url(url)
-                if date:
-                    current_dates.add(date)
-            
-            # Vérifier les nouvelles dates
-            known_dates = set()
-            for month_dates in self.known_dates.values():
-                known_dates.update(month_dates)
-            
-            new_dates = current_dates - known_dates
-            if new_dates:
-                logger.info(f"Nouvelles dates détectées : {sorted(new_dates)}")
-                new_dates_found = sorted(new_dates)
-            
-            # Mettre à jour les dates connues
-            self._save_known_dates(list(current_dates))
-            
-            # Vérifier chaque URL
-            for url in planning_urls:
-                logger.debug(f"Vérification de l'URL: {url}")
-                date = self._extract_date_from_url(url)
-                
-                # Si c'est une nouvelle date, on la traite en priorité
-                if date in new_dates:
-                    logger.info(f"Vérification prioritaire de la nouvelle date : {date}")
-                
-                # Sauvegarder l'URL originale
-                original_url = self.config.PLANNING_URL
-                try:
-                    # Remplacer temporairement l'URL
-                    self.config.PLANNING_URL = url
-                    # Vérifier cette date
-                    available_slots = self.check_availability(target_time)
-                    if available_slots:
-                        # Pour les nouvelles dates, on considère tous les créneaux comme "nouveaux"
-                        if date in new_dates:
-                            all_slots = []
-                            soup = BeautifulSoup(response.text, 'html.parser')
-                            slots = soup.select('tr')
-                            for slot in slots:
-                                time_cell = slot.select_one('th')
-                                if not time_cell:
-                                    continue
-                                time = time_cell.text.strip()
-                                if time != target_time.replace(':', 'H'):
-                                    continue
-                                courts = slot.select('td')
-                                for i, court in enumerate(courts, 1):
-                                    court_classes = court.get('class', [])
-                                    if self._is_court_available(court_classes):
-                                        all_slots.append((time, f"Padel {i}", date))
-                            all_available_slots.extend(all_slots)
-                        else:
-                            all_available_slots.extend(available_slots)
-                finally:
-                    # Restaurer l'URL originale
-                    self.config.PLANNING_URL = original_url
-            
-            return all_available_slots, new_dates_found
-            
-        except Exception as e:
-            logger.error(f"Erreur lors de la vérification de toutes les dates: {str(e)}")
-            return [], []

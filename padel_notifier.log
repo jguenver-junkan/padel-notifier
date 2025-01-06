@@ -2165,3 +2165,888 @@
 2025-01-06 23:44:08,252 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: libre, État précédent: libre
 2025-01-06 23:44:08,253 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
 2025-01-06 23:44:08,967 - src.email_notifier - INFO - Notification envoyée à jguenver@gmail.com
+2025-01-06 23:48:07,175 - __main__ - INFO - Démarrage du service de notification Padel...
+2025-01-06 23:48:07,176 - __main__ - INFO - Tentative de connexion au site...
+2025-01-06 23:48:07,176 - src.court_checker - INFO - Récupération de la page de connexion...
+2025-01-06 23:48:07,180 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.mareservation.fr:443
+2025-01-06 23:48:07,326 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET / HTTP/1.1" 302 274
+2025-01-06 23:48:07,450 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre HTTP/1.1" 200 2814
+2025-01-06 23:48:07,454 - src.court_checker - INFO - URL du formulaire : https://www.mareservation.fr/membre
+2025-01-06 23:48:07,454 - src.court_checker - INFO - Données du formulaire : {'_username': '8695', '_password': '****'}
+2025-01-06 23:48:07,454 - src.court_checker - INFO - Tentative de connexion pour l'utilisateur 8695...
+2025-01-06 23:48:07,570 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "POST /membre HTTP/1.1" 302 418
+2025-01-06 23:48:07,710 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/accueil HTTP/1.1" 200 8214
+2025-01-06 23:48:07,711 - src.court_checker - INFO - Status code: 200
+2025-01-06 23:48:07,711 - src.court_checker - INFO - URL finale: https://www.mareservation.fr/membre/accueil
+2025-01-06 23:48:07,711 - src.court_checker - INFO - Connexion réussie
+2025-01-06 23:48:07,711 - __main__ - INFO - Lancement de la première vérification...
+2025-01-06 23:48:07,868 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6 HTTP/1.1" 200 34531
+2025-01-06 23:48:07,895 - src.court_checker - DEBUG - URLs de planning trouvées : ['https://www.mareservation.fr/membre/planning/1', 'https://www.mareservation.fr/membre/planning/2', 'https://www.mareservation.fr/membre/planning/6', 'https://www.mareservation.fr/membre/planning/6?date=06-01-2025', 'https://www.mareservation.fr/membre/planning/6?date=07-01-2025', 'https://www.mareservation.fr/membre/planning/6?date=08-01-2025', 'https://www.mareservation.fr/membre/planning/6?date=09-01-2025', 'https://www.mareservation.fr/membre/planning/6?date=10-01-2025', 'https://www.mareservation.fr/membre/planning/6?date=11-01-2025', 'https://www.mareservation.fr/membre/planning/6?date=12-01-2025', 'https://www.mareservation.fr/membre/planning/6?date=13-01-2025']
+2025-01-06 23:48:07,895 - src.court_checker - INFO - Vérification de 11 dates
+2025-01-06 23:48:07,897 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/1
+2025-01-06 23:48:07,897 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:08,058 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/1 HTTP/1.1" 200 76594
+2025-01-06 23:48:08,090 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:08,094 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:08,096 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING BADMINTON DU lundi 06 janvier 2025
+2025-01-06 23:48:08,096 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:08,099 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:08,100 - src.court_checker - DEBUG - Nombre de lignes trouvées : 38
+2025-01-06 23:48:08,100 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:08,100 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:08,100 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:08,100 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:08,100 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:08,101 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:08,101 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:08,235 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/1 HTTP/1.1" 200 76594
+2025-01-06 23:48:08,253 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:08,257 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:08,259 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING BADMINTON DU lundi 06 janvier 2025
+2025-01-06 23:48:08,259 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:08,259 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:08,260 - src.court_checker - DEBUG - Nombre de lignes trouvées : 38
+2025-01-06 23:48:08,261 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 20H00: 4
+2025-01-06 23:48:08,261 - src.court_checker - DEBUG - Terrain 1 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:08,261 - src.court_checker - DEBUG - Terrain 2 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:08,261 - src.court_checker - DEBUG - Terrain 3 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:08,261 - src.court_checker - DEBUG - Terrain 4 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:08,262 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:08,262 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:08,406 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/1 HTTP/1.1" 200 76594
+2025-01-06 23:48:08,425 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:08,430 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:08,432 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING BADMINTON DU lundi 06 janvier 2025
+2025-01-06 23:48:08,432 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:08,432 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:08,433 - src.court_checker - DEBUG - Nombre de lignes trouvées : 38
+2025-01-06 23:48:08,433 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 21H00: 4
+2025-01-06 23:48:08,433 - src.court_checker - DEBUG - Terrain 1 à 21H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:08,433 - src.court_checker - DEBUG - Terrain 2 à 21H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:08,433 - src.court_checker - DEBUG - Terrain 3 à 21H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:08,433 - src.court_checker - DEBUG - Terrain 4 à 21H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:08,434 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:08,434 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/2
+2025-01-06 23:48:08,434 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:08,604 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/2 HTTP/1.1" 200 42353
+2025-01-06 23:48:08,615 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:08,619 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:08,622 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING SQUASH DU lundi 06 janvier 2025
+2025-01-06 23:48:08,622 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:08,622 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:08,623 - src.court_checker - DEBUG - Nombre de lignes trouvées : 19
+2025-01-06 23:48:08,624 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:08,624 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:08,765 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/2 HTTP/1.1" 200 42353
+2025-01-06 23:48:08,778 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:08,782 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:08,784 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING SQUASH DU lundi 06 janvier 2025
+2025-01-06 23:48:08,784 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:08,784 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:08,785 - src.court_checker - DEBUG - Nombre de lignes trouvées : 19
+2025-01-06 23:48:08,786 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:08,786 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:08,925 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/2 HTTP/1.1" 200 42353
+2025-01-06 23:48:08,940 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:08,943 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:08,945 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING SQUASH DU lundi 06 janvier 2025
+2025-01-06 23:48:08,945 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:08,945 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:08,946 - src.court_checker - DEBUG - Nombre de lignes trouvées : 19
+2025-01-06 23:48:08,947 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:08,947 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6
+2025-01-06 23:48:08,947 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:09,084 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6 HTTP/1.1" 200 34531
+2025-01-06 23:48:09,094 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:09,098 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:09,100 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 06 janvier 2025
+2025-01-06 23:48:09,100 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:09,100 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:09,101 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:09,101 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:09,101 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:09,101 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,101 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:09,102 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,103 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:09,103 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:09,245 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6 HTTP/1.1" 200 34531
+2025-01-06 23:48:09,259 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:09,263 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:09,265 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 06 janvier 2025
+2025-01-06 23:48:09,265 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:09,265 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:09,266 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:09,267 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 20H00: 4
+2025-01-06 23:48:09,267 - src.court_checker - DEBUG - Terrain 1 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,267 - src.court_checker - DEBUG - Terrain 2 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,267 - src.court_checker - DEBUG - Terrain 3 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,267 - src.court_checker - DEBUG - Terrain 4 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,268 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:09,268 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:09,411 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6 HTTP/1.1" 200 34531
+2025-01-06 23:48:09,421 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:09,425 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:09,427 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 06 janvier 2025
+2025-01-06 23:48:09,427 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:09,428 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:09,428 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:09,429 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 21H00: 4
+2025-01-06 23:48:09,429 - src.court_checker - DEBUG - Terrain 1 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,429 - src.court_checker - DEBUG - Terrain 2 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,429 - src.court_checker - DEBUG - Terrain 3 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,429 - src.court_checker - DEBUG - Terrain 4 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,430 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:09,430 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6?date=06-01-2025
+2025-01-06 23:48:09,430 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:09,568 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=06-01-2025 HTTP/1.1" 200 34531
+2025-01-06 23:48:09,586 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:09,589 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:09,591 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 06 janvier 2025
+2025-01-06 23:48:09,591 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:09,591 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:09,591 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:09,591 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:09,591 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:09,591 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,591 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: libre, État précédent: inconnu
+2025-01-06 23:48:09,591 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,592 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:09,593 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:09,730 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=06-01-2025 HTTP/1.1" 200 34531
+2025-01-06 23:48:09,742 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:09,745 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:09,748 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 06 janvier 2025
+2025-01-06 23:48:09,748 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:09,748 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:09,748 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:09,749 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 20H00: 4
+2025-01-06 23:48:09,749 - src.court_checker - DEBUG - Terrain 1 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,749 - src.court_checker - DEBUG - Terrain 2 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,749 - src.court_checker - DEBUG - Terrain 3 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,749 - src.court_checker - DEBUG - Terrain 4 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,750 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:09,750 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:09,884 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=06-01-2025 HTTP/1.1" 200 34531
+2025-01-06 23:48:09,895 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:09,899 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:09,901 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 06 janvier 2025
+2025-01-06 23:48:09,902 - src.court_checker - DEBUG - Date extraite : lundi 06 janvier 2025
+2025-01-06 23:48:09,902 - src.court_checker - INFO - Date du planning : lundi 06 janvier 2025 (2025-01-06)
+2025-01-06 23:48:09,902 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:09,903 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 21H00: 4
+2025-01-06 23:48:09,903 - src.court_checker - DEBUG - Terrain 1 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,903 - src.court_checker - DEBUG - Terrain 2 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,903 - src.court_checker - DEBUG - Terrain 3 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,903 - src.court_checker - DEBUG - Terrain 4 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:09,904 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:09,904 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6?date=07-01-2025
+2025-01-06 23:48:09,904 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:10,041 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=07-01-2025 HTTP/1.1" 200 38739
+2025-01-06 23:48:10,053 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:10,057 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:10,059 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU mardi 07 janvier 2025
+2025-01-06 23:48:10,059 - src.court_checker - DEBUG - Date extraite : mardi 07 janvier 2025
+2025-01-06 23:48:10,060 - src.court_checker - INFO - Date du planning : mardi 07 janvier 2025 (2025-01-07)
+2025-01-06 23:48:10,060 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:10,061 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:10,061 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:10,061 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:10,061 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:10,061 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:10,062 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:10,062 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:10,200 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=07-01-2025 HTTP/1.1" 200 38739
+2025-01-06 23:48:10,213 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:10,216 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:10,219 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU mardi 07 janvier 2025
+2025-01-06 23:48:10,219 - src.court_checker - DEBUG - Date extraite : mardi 07 janvier 2025
+2025-01-06 23:48:10,219 - src.court_checker - INFO - Date du planning : mardi 07 janvier 2025 (2025-01-07)
+2025-01-06 23:48:10,219 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:10,220 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 20H00: 4
+2025-01-06 23:48:10,220 - src.court_checker - DEBUG - Terrain 1 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,220 - src.court_checker - DEBUG - Terrain 2 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,220 - src.court_checker - DEBUG - Terrain 3 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,220 - src.court_checker - DEBUG - Terrain 4 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,221 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:10,221 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:10,357 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=07-01-2025 HTTP/1.1" 200 38739
+2025-01-06 23:48:10,369 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:10,373 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:10,375 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU mardi 07 janvier 2025
+2025-01-06 23:48:10,375 - src.court_checker - DEBUG - Date extraite : mardi 07 janvier 2025
+2025-01-06 23:48:10,375 - src.court_checker - INFO - Date du planning : mardi 07 janvier 2025 (2025-01-07)
+2025-01-06 23:48:10,376 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:10,376 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 21H00: 4
+2025-01-06 23:48:10,376 - src.court_checker - DEBUG - Terrain 1 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,376 - src.court_checker - DEBUG - Terrain 2 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,376 - src.court_checker - DEBUG - Terrain 3 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,376 - src.court_checker - DEBUG - Terrain 4 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,377 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:10,377 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6?date=08-01-2025
+2025-01-06 23:48:10,377 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:10,512 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=08-01-2025 HTTP/1.1" 200 40963
+2025-01-06 23:48:10,524 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:10,529 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:10,531 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU mercredi 08 janvier 2025
+2025-01-06 23:48:10,531 - src.court_checker - DEBUG - Date extraite : mercredi 08 janvier 2025
+2025-01-06 23:48:10,531 - src.court_checker - INFO - Date du planning : mercredi 08 janvier 2025 (2025-01-08)
+2025-01-06 23:48:10,532 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:10,532 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:10,532 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:10,532 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:10,532 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:10,532 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:10,533 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:10,533 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:10,679 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=08-01-2025 HTTP/1.1" 200 40963
+2025-01-06 23:48:10,690 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:10,694 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:10,696 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU mercredi 08 janvier 2025
+2025-01-06 23:48:10,696 - src.court_checker - DEBUG - Date extraite : mercredi 08 janvier 2025
+2025-01-06 23:48:10,696 - src.court_checker - INFO - Date du planning : mercredi 08 janvier 2025 (2025-01-08)
+2025-01-06 23:48:10,697 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:10,698 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 20H00: 4
+2025-01-06 23:48:10,698 - src.court_checker - DEBUG - Terrain 1 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,698 - src.court_checker - DEBUG - Terrain 2 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,698 - src.court_checker - DEBUG - Terrain 3 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,698 - src.court_checker - DEBUG - Terrain 4 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,699 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:10,699 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:10,830 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=08-01-2025 HTTP/1.1" 200 40963
+2025-01-06 23:48:10,843 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:10,847 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:10,849 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU mercredi 08 janvier 2025
+2025-01-06 23:48:10,849 - src.court_checker - DEBUG - Date extraite : mercredi 08 janvier 2025
+2025-01-06 23:48:10,849 - src.court_checker - INFO - Date du planning : mercredi 08 janvier 2025 (2025-01-08)
+2025-01-06 23:48:10,850 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:10,850 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 21H00: 4
+2025-01-06 23:48:10,850 - src.court_checker - DEBUG - Terrain 1 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,850 - src.court_checker - DEBUG - Terrain 2 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,850 - src.court_checker - DEBUG - Terrain 3 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,850 - src.court_checker - DEBUG - Terrain 4 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:10,851 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:10,851 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6?date=09-01-2025
+2025-01-06 23:48:10,851 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:10,975 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=09-01-2025 HTTP/1.1" 200 38739
+2025-01-06 23:48:10,987 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:10,991 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:10,993 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU jeudi 09 janvier 2025
+2025-01-06 23:48:10,993 - src.court_checker - DEBUG - Date extraite : jeudi 09 janvier 2025
+2025-01-06 23:48:10,993 - src.court_checker - INFO - Date du planning : jeudi 09 janvier 2025 (2025-01-09)
+2025-01-06 23:48:10,994 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:10,994 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:10,994 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:10,994 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:10,994 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:10,994 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:10,995 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:10,995 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:11,136 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=09-01-2025 HTTP/1.1" 200 38739
+2025-01-06 23:48:11,149 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:11,153 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:11,154 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU jeudi 09 janvier 2025
+2025-01-06 23:48:11,155 - src.court_checker - DEBUG - Date extraite : jeudi 09 janvier 2025
+2025-01-06 23:48:11,155 - src.court_checker - INFO - Date du planning : jeudi 09 janvier 2025 (2025-01-09)
+2025-01-06 23:48:11,155 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:11,156 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 20H00: 4
+2025-01-06 23:48:11,156 - src.court_checker - DEBUG - Terrain 1 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,156 - src.court_checker - DEBUG - Terrain 2 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,156 - src.court_checker - DEBUG - Terrain 3 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,156 - src.court_checker - DEBUG - Terrain 4 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,157 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:11,157 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:11,293 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=09-01-2025 HTTP/1.1" 200 38739
+2025-01-06 23:48:11,305 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:11,309 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:11,310 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU jeudi 09 janvier 2025
+2025-01-06 23:48:11,310 - src.court_checker - DEBUG - Date extraite : jeudi 09 janvier 2025
+2025-01-06 23:48:11,311 - src.court_checker - INFO - Date du planning : jeudi 09 janvier 2025 (2025-01-09)
+2025-01-06 23:48:11,311 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:11,312 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 21H00: 4
+2025-01-06 23:48:11,312 - src.court_checker - DEBUG - Terrain 1 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,312 - src.court_checker - DEBUG - Terrain 2 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,312 - src.court_checker - DEBUG - Terrain 3 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,312 - src.court_checker - DEBUG - Terrain 4 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,313 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:11,313 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6?date=10-01-2025
+2025-01-06 23:48:11,313 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:11,460 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=10-01-2025 HTTP/1.1" 200 37906
+2025-01-06 23:48:11,473 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:11,477 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:11,479 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU vendredi 10 janvier 2025
+2025-01-06 23:48:11,479 - src.court_checker - DEBUG - Date extraite : vendredi 10 janvier 2025
+2025-01-06 23:48:11,479 - src.court_checker - INFO - Date du planning : vendredi 10 janvier 2025 (2025-01-10)
+2025-01-06 23:48:11,480 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:11,480 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:11,480 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:11,480 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:11,480 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:11,480 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:11,481 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:11,481 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:11,617 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=10-01-2025 HTTP/1.1" 200 37906
+2025-01-06 23:48:11,628 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:11,632 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:11,634 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU vendredi 10 janvier 2025
+2025-01-06 23:48:11,634 - src.court_checker - DEBUG - Date extraite : vendredi 10 janvier 2025
+2025-01-06 23:48:11,634 - src.court_checker - INFO - Date du planning : vendredi 10 janvier 2025 (2025-01-10)
+2025-01-06 23:48:11,635 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:11,635 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 20H00: 4
+2025-01-06 23:48:11,635 - src.court_checker - DEBUG - Terrain 1 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,635 - src.court_checker - DEBUG - Terrain 2 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,635 - src.court_checker - DEBUG - Terrain 3 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,635 - src.court_checker - DEBUG - Terrain 4 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,636 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:11,636 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:11,772 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=10-01-2025 HTTP/1.1" 200 37906
+2025-01-06 23:48:11,790 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:11,794 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:11,795 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU vendredi 10 janvier 2025
+2025-01-06 23:48:11,795 - src.court_checker - DEBUG - Date extraite : vendredi 10 janvier 2025
+2025-01-06 23:48:11,795 - src.court_checker - INFO - Date du planning : vendredi 10 janvier 2025 (2025-01-10)
+2025-01-06 23:48:11,796 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:11,796 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 21H00: 4
+2025-01-06 23:48:11,796 - src.court_checker - DEBUG - Terrain 1 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,796 - src.court_checker - DEBUG - Terrain 2 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,796 - src.court_checker - DEBUG - Terrain 3 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,796 - src.court_checker - DEBUG - Terrain 4 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:11,797 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:11,797 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6?date=11-01-2025
+2025-01-06 23:48:11,797 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:11,935 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=11-01-2025 HTTP/1.1" 200 23192
+2025-01-06 23:48:11,945 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:11,956 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:11,960 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU samedi 11 janvier 2025
+2025-01-06 23:48:11,960 - src.court_checker - DEBUG - Date extraite : samedi 11 janvier 2025
+2025-01-06 23:48:11,961 - src.court_checker - INFO - Date du planning : samedi 11 janvier 2025 (2025-01-11)
+2025-01-06 23:48:11,961 - src.court_checker - DEBUG - Nombre de lignes trouvées : 9
+2025-01-06 23:48:11,961 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:11,961 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:11,961 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:11,961 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:11,961 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:11,962 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:11,962 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:12,104 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=11-01-2025 HTTP/1.1" 200 23192
+2025-01-06 23:48:12,113 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:12,116 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:12,119 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU samedi 11 janvier 2025
+2025-01-06 23:48:12,119 - src.court_checker - DEBUG - Date extraite : samedi 11 janvier 2025
+2025-01-06 23:48:12,119 - src.court_checker - INFO - Date du planning : samedi 11 janvier 2025 (2025-01-11)
+2025-01-06 23:48:12,120 - src.court_checker - DEBUG - Nombre de lignes trouvées : 9
+2025-01-06 23:48:12,121 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:12,121 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:12,256 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=11-01-2025 HTTP/1.1" 200 23192
+2025-01-06 23:48:12,265 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:12,268 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:12,271 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU samedi 11 janvier 2025
+2025-01-06 23:48:12,271 - src.court_checker - DEBUG - Date extraite : samedi 11 janvier 2025
+2025-01-06 23:48:12,271 - src.court_checker - INFO - Date du planning : samedi 11 janvier 2025 (2025-01-11)
+2025-01-06 23:48:12,272 - src.court_checker - DEBUG - Nombre de lignes trouvées : 9
+2025-01-06 23:48:12,273 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:12,273 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6?date=12-01-2025
+2025-01-06 23:48:12,273 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:12,419 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=12-01-2025 HTTP/1.1" 200 23194
+2025-01-06 23:48:12,428 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:12,432 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:12,434 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU dimanche 12 janvier 2025
+2025-01-06 23:48:12,434 - src.court_checker - DEBUG - Date extraite : dimanche 12 janvier 2025
+2025-01-06 23:48:12,434 - src.court_checker - INFO - Date du planning : dimanche 12 janvier 2025 (2025-01-12)
+2025-01-06 23:48:12,435 - src.court_checker - DEBUG - Nombre de lignes trouvées : 9
+2025-01-06 23:48:12,435 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:12,435 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:12,435 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:12,435 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:12,435 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: occupé, État précédent: occupé
+2025-01-06 23:48:12,436 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:12,436 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:12,571 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=12-01-2025 HTTP/1.1" 200 23194
+2025-01-06 23:48:12,589 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:12,593 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:12,594 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU dimanche 12 janvier 2025
+2025-01-06 23:48:12,594 - src.court_checker - DEBUG - Date extraite : dimanche 12 janvier 2025
+2025-01-06 23:48:12,594 - src.court_checker - INFO - Date du planning : dimanche 12 janvier 2025 (2025-01-12)
+2025-01-06 23:48:12,594 - src.court_checker - DEBUG - Nombre de lignes trouvées : 9
+2025-01-06 23:48:12,595 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:12,595 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:12,730 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=12-01-2025 HTTP/1.1" 200 23194
+2025-01-06 23:48:12,738 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:12,742 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:12,744 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU dimanche 12 janvier 2025
+2025-01-06 23:48:12,744 - src.court_checker - DEBUG - Date extraite : dimanche 12 janvier 2025
+2025-01-06 23:48:12,745 - src.court_checker - INFO - Date du planning : dimanche 12 janvier 2025 (2025-01-12)
+2025-01-06 23:48:12,746 - src.court_checker - DEBUG - Nombre de lignes trouvées : 9
+2025-01-06 23:48:12,747 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
+2025-01-06 23:48:12,747 - src.court_checker - DEBUG - Vérification de l'URL: https://www.mareservation.fr/membre/planning/6?date=13-01-2025
+2025-01-06 23:48:12,748 - src.court_checker - INFO - Vérification des disponibilités pour 11H00...
+2025-01-06 23:48:12,885 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=13-01-2025 HTTP/1.1" 200 44017
+2025-01-06 23:48:12,899 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:12,903 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:12,905 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 13 janvier 2025
+2025-01-06 23:48:12,905 - src.court_checker - DEBUG - Date extraite : lundi 13 janvier 2025
+2025-01-06 23:48:12,905 - src.court_checker - INFO - Date du planning : lundi 13 janvier 2025 (2025-01-13)
+2025-01-06 23:48:12,906 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:12,906 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 11H00: 4
+2025-01-06 23:48:12,906 - src.court_checker - DEBUG - Terrain 1 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:12,906 - src.court_checker - DEBUG - Terrain 2 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:12,906 - src.court_checker - DEBUG - Terrain 3 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:12,906 - src.court_checker - DEBUG - Terrain 4 à 11H00 - État actuel: libre, État précédent: libre
+2025-01-06 23:48:12,907 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 11H00
+2025-01-06 23:48:12,907 - src.court_checker - INFO - Vérification des disponibilités pour 20H00...
+2025-01-06 23:48:13,046 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=13-01-2025 HTTP/1.1" 200 44017
+2025-01-06 23:48:13,059 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:13,063 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:13,064 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 13 janvier 2025
+2025-01-06 23:48:13,064 - src.court_checker - DEBUG - Date extraite : lundi 13 janvier 2025
+2025-01-06 23:48:13,064 - src.court_checker - INFO - Date du planning : lundi 13 janvier 2025 (2025-01-13)
+2025-01-06 23:48:13,065 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:13,065 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 20H00: 4
+2025-01-06 23:48:13,065 - src.court_checker - DEBUG - Terrain 1 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:13,065 - src.court_checker - DEBUG - Terrain 2 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:13,065 - src.court_checker - DEBUG - Terrain 3 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:13,065 - src.court_checker - DEBUG - Terrain 4 à 20H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:13,065 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 20H00
+2025-01-06 23:48:13,065 - src.court_checker - INFO - Vérification des disponibilités pour 21H00...
+2025-01-06 23:48:13,203 - urllib3.connectionpool - DEBUG - https://www.mareservation.fr:443 "GET /membre/planning/6?date=13-01-2025 HTTP/1.1" 200 44017
+2025-01-06 23:48:13,215 - src.court_checker - DEBUG - HTML de la page :
+2025-01-06 23:48:13,220 - src.court_checker - DEBUG - <!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Welcome!
+  </title>
+  <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" rel="stylesheet"/>
+  <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" integrity="sha384-OHBBOqpYHNsIqQy8hL1U+8OXf9hH6QRxi0+EODezv82DfnZoV7qoHAZDwMwEJvSw" rel="stylesheet"/>
+  <script crossorigin="anonymous" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+  </script>
+  <script crossorigin="an
+2025-01-06 23:48:13,222 - src.court_checker - DEBUG - Trouvé avec le sélecteur .planning--title: PLANNING PADEL DU lundi 13 janvier 2025
+2025-01-06 23:48:13,222 - src.court_checker - DEBUG - Date extraite : lundi 13 janvier 2025
+2025-01-06 23:48:13,222 - src.court_checker - INFO - Date du planning : lundi 13 janvier 2025 (2025-01-13)
+2025-01-06 23:48:13,222 - src.court_checker - DEBUG - Nombre de lignes trouvées : 15
+2025-01-06 23:48:13,223 - src.court_checker - DEBUG - Nombre de terrains trouvés pour 21H00: 4
+2025-01-06 23:48:13,223 - src.court_checker - DEBUG - Terrain 1 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:13,223 - src.court_checker - DEBUG - Terrain 2 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:13,223 - src.court_checker - DEBUG - Terrain 3 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:13,223 - src.court_checker - DEBUG - Terrain 4 à 21H00 - État actuel: occupé, État précédent: inconnu
+2025-01-06 23:48:13,223 - src.court_checker - DEBUG - Aucun nouveau créneau disponible pour 21H00
