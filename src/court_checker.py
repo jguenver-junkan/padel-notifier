@@ -297,51 +297,48 @@ class CourtChecker:
         """
         Vérifie la disponibilité des terrains pour toutes les dates disponibles
         """
+        if target_times is None:
+            target_times = self.config.TARGET_TIMES
+            
         all_available_slots = []
         new_dates_found = []
         
         try:
-            # Récupérer la première page de planning
+            # Se connecter si nécessaire
+            self._login()
+            
+            # Obtenir la page principale du planning
             response = self.session.get(self.config.PLANNING_URL)
-            if "/membre/login" in response.url:
-                logger.info("Session expirée, reconnexion...")
-                if not self._login():
-                    logger.error("Échec de la reconnexion")
-                    return [], []
-                response = self.session.get(self.config.PLANNING_URL)
-            
             response.raise_for_status()
-            logger.debug(f"URL finale du planning : {response.url}")
-            logger.debug("Contenu de la page de planning reçu")
             
+            # Parser la page
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Extraire toutes les URLs de planning disponibles
+            # Obtenir toutes les URLs de planning disponibles
             planning_urls = self._get_planning_urls(soup)
             
-            # Vérifier chaque date
+            # Pour chaque URL de planning
             for url in planning_urls:
-                response = self.session.get(url)
-                if response.status_code != 200:
-                    logger.error(f"Erreur lors de l'accès au planning : {response.status_code}")
-                    continue
-                
-                soup = BeautifulSoup(response.text, 'html.parser')
-                date = self._extract_date(soup)
+                # Extraire la date de l'URL
+                date = self._extract_date_from_url(url)
                 if not date:
-                    logger.error("Impossible de trouver la date du planning")
                     continue
                 
                 logger.info(f"Vérification du planning pour le {date}")
                 
-                # Vérifier les disponibilités pour cette date
-                for target_time in (target_times or self.config.TARGET_TIMES):
+                # Pour chaque horaire cible
+                for target_time in target_times:
+                    logger.info(f"Vérification des disponibilités pour {target_time}...")
                     available_slots = self.check_availability(target_time, date)
                     if available_slots:
                         all_available_slots.extend(available_slots)
                         if date not in self.known_dates:
                             new_dates_found.append(date)
                             self.known_dates.add(date)
+            
+            # Sauvegarder les nouvelles dates
+            if new_dates_found:
+                self._save_known_dates(list(self.known_dates))
             
             return all_available_slots, new_dates_found
             
@@ -362,82 +359,74 @@ class CourtChecker:
             List[Tuple[str, str, str]]: Liste de tuples (heure, numéro de terrain, date)
                                        Ne contient que les terrains nouvellement disponibles
         """
-        if target_time is None:
-            target_time = self.config.TARGET_TIMES[0]
-            
-        target_time_site_format = target_time
-        newly_available_slots = []
-        current_states = {}
-
         try:
-            logger.info(f"Vérification des disponibilités pour {target_time_site_format}...")
-            
-            # Construire l'URL avec la date si spécifiée
+            # Construire l'URL avec la date si fournie
             url = self.config.PLANNING_URL
             if planning_date:
-                # Convertir la date au format DD-MM-YYYY
-                try:
-                    date_obj = datetime.strptime(planning_date, "%A %d %B %Y")
-                    formatted_date = date_obj.strftime("%d-%m-%Y")
-                    url += f"?date={formatted_date}"
-                except ValueError as e:
-                    logger.error(f"Erreur lors de la conversion de la date '{planning_date}': {str(e)}")
-                    return
-            
-            # Récupérer la page du planning
+                # Convertir la date au format DD-MM-YYYY pour l'URL
+                date_obj = datetime.strptime(planning_date, '%Y-%m-%d')
+                formatted_date = date_obj.strftime('%d-%m-%Y')
+                url = f"{url}?date={formatted_date}"
+
+            # Faire la requête
             response = self.session.get(url)
+            
+            # Vérifier si on a été redirigé vers la page de connexion
+            if "/membre" in response.url and "planning" not in response.url:
+                logger.info("Session expirée, reconnexion...")
+                self._login()
+                # Réessayer la requête après la reconnexion
+                response = self.session.get(url)
+            
+            # Vérifier le code de statut
             response.raise_for_status()
             
-            # Parser la page
+            # Parser le HTML
             soup = BeautifulSoup(response.text, 'html.parser')
             
             # Extraire la date du planning
             date_text = self._extract_date(soup)
             if not date_text:
                 logger.error("Impossible de trouver la date du planning")
-                return
+                return []
             
-            # Convertir la date en objet datetime
-            try:
-                date_obj = datetime.strptime(date_text, "%A %d %B %Y")
-                logger.info(f"Date du planning : {date_text} ({date_obj.strftime('%Y-%m-%d')})")
-            except ValueError as e:
-                logger.error(f"Erreur lors de la conversion de la date '{date_text}': {str(e)}")
-                return
+            # Convertir la date en format YYYY-MM-DD
+            planning_date = self._convert_date_to_iso(date_text)
+            if not planning_date:
+                return []
             
-            # Vérifier les disponibilités pour l'horaire demandé
+            logger.info(f"Date du planning : {date_text} ({planning_date})")
+            
+            # Si aucun horaire n'est spécifié, utiliser celui de la config
+            if not target_time:
+                target_time = self.config.TARGET_TIME
+            
+            # Trouver les créneaux disponibles
             available_slots = self._find_available_slots(soup, target_time)
             
-            # Si des créneaux sont disponibles, vérifier s'ils sont nouveaux
-            if available_slots:
-                state_key = f"{date_obj.strftime('%Y-%m-%d')}_{target_time}"
-                if state_key not in self.previous_states:
-                    self.previous_states[state_key] = []
-                
-                # Identifier les nouveaux créneaux
-                new_slots = []
-                for slot in available_slots:
-                    if slot not in self.previous_states[state_key]:
-                        new_slots.append(slot)
-                        self.previous_states[state_key].append(slot)
-                
-                # Sauvegarder l'état
-                self._save_states()
-                
-                # Si de nouveaux créneaux sont disponibles, envoyer une notification
-                if new_slots:
-                    message = f"Nouveaux créneaux disponibles pour {target_time} le {date_text} :\n"
-                    message += "\n".join([f"- {slot}" for slot in new_slots])
-                    logger.info(message)
-                    self.notifier.send_notification("Créneaux Padel disponibles !", message)
-                else:
-                    logger.debug(f"Aucun nouveau créneau disponible pour {target_time}")
+            # Vérifier si ces créneaux sont nouveaux
+            new_slots = []
+            state_key = f"{target_time}|{planning_date}"
+            previous_state = self.previous_states.get(state_key, {})
+            
+            for slot in available_slots:
+                if slot not in previous_state or previous_state[slot] != "libre":
+                    new_slots.append((target_time, slot, planning_date))
+                    # Mettre à jour l'état
+                    if state_key not in self.previous_states:
+                        self.previous_states[state_key] = {}
+                    self.previous_states[state_key][slot] = "libre"
+            
+            # Sauvegarder le nouvel état
+            if new_slots:
+                self._save_states(self.previous_states[state_key], planning_date)
+                logger.info(f"Nouveaux créneaux disponibles pour {target_time} : {new_slots}")
             else:
                 logger.debug(f"Aucun nouveau créneau disponible pour {target_time}")
             
-            return newly_available_slots
+            return new_slots
             
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             logger.error(f"Erreur lors de la vérification des disponibilités : {str(e)}")
             return []
 
@@ -448,6 +437,10 @@ class CourtChecker:
     def _extract_date(self, soup: BeautifulSoup) -> str:
         """Extrait la date du planning"""
         try:
+            # Log du contenu HTML pour le debug
+            logger.debug("Contenu HTML de la page :")
+            logger.debug(str(soup)[:1000])  # Les 1000 premiers caractères
+            
             # Essayer différents sélecteurs possibles pour trouver le titre
             selectors = [
                 '.planning--title',
@@ -468,8 +461,10 @@ class CourtChecker:
             # D'abord, essayer les sélecteurs spécifiques
             for selector in selectors:
                 elements = soup.select(selector)
+                logger.debug(f"Recherche avec le sélecteur {selector} : {len(elements)} éléments trouvés")
                 for element in elements:
                     text = element.get_text().strip().lower()
+                    logger.debug(f"Texte trouvé : {text}")
                     # Si le texte contient un mois français
                     if any(mois in text for mois in mois_fr):
                         # Extraire la partie après "planning padel du"
@@ -482,6 +477,8 @@ class CourtChecker:
             
             # Si rien n'a fonctionné, chercher dans tout le texte
             full_text = soup.get_text().lower()
+            logger.debug("Texte complet de la page :")
+            logger.debug(full_text[:1000])  # Les 1000 premiers caractères
             
             # Chercher un motif de date
             date_patterns = [
@@ -491,6 +488,7 @@ class CourtChecker:
             ]
             
             for pattern in date_patterns:
+                logger.debug(f"Essai du pattern : {pattern}")
                 match = re.search(pattern, full_text)
                 if match:
                     date_text = match.group(0)
@@ -501,8 +499,6 @@ class CourtChecker:
             
             # Si on arrive ici, aucune date n'a été trouvée
             logger.error("Aucune date trouvée dans la page")
-            logger.debug("Contenu de la page :")
-            logger.debug(full_text[:500])
             return ""
             
         except Exception as e:
@@ -522,8 +518,11 @@ class CourtChecker:
             links = soup.find_all('a', href=True)
             latest_date = None
             
+            # Log pour le debug
+            logger.debug(f"Nombre total de liens trouvés : {len(links)}")
             for link in links:
                 href = link.get('href', '')
+                logger.debug(f"Analyse du lien : {href}")
                 # Ne garder que les URLs de planning (pas les URLs de réservation)
                 if '/membre/planning/6' in href and 'reserver' not in href:
                     full_url = urljoin(self.config.SITE_URL, href)
@@ -537,6 +536,7 @@ class CourtChecker:
                                 current_date = datetime.strptime(date_str, '%d-%m-%Y')
                                 if not latest_date or current_date > latest_date:
                                     latest_date = current_date
+                                logger.debug(f"Date trouvée dans l'URL : {date_str}")
                             except ValueError:
                                 continue
             
@@ -552,19 +552,24 @@ class CourtChecker:
             
         except Exception as e:
             logger.error(f"Erreur lors de l'extraction des URLs de planning : {str(e)}")
-            return [self.config.PLANNING_URL]  # Toujours retourner au moins l'URL principale
+            return urls
 
     def _extract_date_from_url(self, url: str) -> str:
         """Extrait la date d'une URL de planning"""
         try:
-            if "date=" in url:
-                date_param = url.split("date=")[1].split("&")[0]
-                # Convertir du format "DD-MM-YYYY" en "YYYY-MM-DD"
-                day, month, year = date_param.split("-")
-                return f"{year}-{month}-{day}"
-        except Exception as e:
-            logger.error(f"Erreur lors de l'extraction de la date de l'URL {url}: {str(e)}")
-        return None
+            # Extraire la date de l'URL (format: DD-MM-YYYY)
+            date_match = re.search(r'date=(\d{2}-\d{2}-\d{4})', url)
+            if date_match:
+                date_str = date_match.group(1)
+                # Convertir en format YYYY-MM-DD
+                date_obj = datetime.strptime(date_str, '%d-%m-%Y')
+                return date_obj.strftime('%Y-%m-%d')
+            else:
+                # Si pas de date dans l'URL, c'est la date du jour
+                return datetime.now().strftime('%Y-%m-%d')
+        except ValueError as e:
+            logger.error(f"Erreur lors de l'extraction de la date de l'URL '{url}': {str(e)}")
+            return None
 
     def _find_available_slots(self, soup: BeautifulSoup, target_time: str) -> List[str]:
         """
@@ -605,3 +610,12 @@ class CourtChecker:
                     available_slots.append(f"Padel {i}")
         
         return available_slots
+
+    def _convert_date_to_iso(self, date_text: str) -> str:
+        """Convertit une date au format texte en date ISO"""
+        try:
+            date_obj = datetime.strptime(date_text, "%A %d %B %Y")
+            return date_obj.strftime("%Y-%m-%d")
+        except ValueError as e:
+            logger.error(f"Erreur lors de la conversion de la date '{date_text}': {str(e)}")
+        return None
