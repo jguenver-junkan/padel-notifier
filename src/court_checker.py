@@ -10,7 +10,14 @@ from urllib.parse import urljoin
 import re
 
 # Configurer locale en français
-locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+try:
+    locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+except locale.Error:
+    try:
+        # Fallback sur fr_FR
+        locale.setlocale(locale.LC_TIME, 'fr_FR')
+    except locale.Error:
+        logger.warning("Impossible de configurer la locale française. Les dates pourraient ne pas être correctement détectées.")
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +27,13 @@ class CourtChecker:
         self.session = requests.Session()
         self.state_file = "court_states.json"
         self.dates_file = "known_dates.json"
+        self.known_dates = set()
         
         # Charger l'état précédent ou créer un nouveau dictionnaire
         self.previous_states = self._load_states()
-        self.known_dates = self._load_known_dates()
+        
+        # Charger les dates connues
+        self._load_known_dates()
         
         # Headers pour simuler un navigateur
         self.session.headers.update({
@@ -186,52 +196,51 @@ class CourtChecker:
                 os.replace(backup_file, self.dates_file)
 
     def _login(self) -> bool:
-        """
-        Se connecte au site web
-        """
+        """Se connecte au site"""
         try:
-            # Si on est déjà sur la page d'accueil, on est déjà connecté
+            # Récupérer la page de login
             response = self.session.get(self.config.LOGIN_URL)
-            if "/membre/accueil" in response.url:
-                logger.info("Déjà connecté")
-                return True
-                
+            response.raise_for_status()
+            
+            # Log du contenu HTML pour debug
+            logger.info("Contenu de la page de login reçu")
+            logger.debug(f"URL finale après redirection : {response.url}")
+            
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Extraire l'URL du formulaire
-            form = soup.find('form')
-            if not form:
-                logger.error("Formulaire de connexion non trouvé")
+            # Trouver le formulaire de login
+            login_form = soup.find('form', {'id': 'login-form'})
+            if not login_form:
+                logger.error("Formulaire de login non trouvé")
                 return False
-                
-            login_url = form.get('action', '')
-            if not login_url:
-                login_url = self.config.LOGIN_URL
-            elif not login_url.startswith('http'):
-                login_url = urljoin(self.config.SITE_URL, login_url)
             
-            # Préparer les données de connexion
+            # Extraire le token CSRF si présent
+            csrf_token = None
+            csrf_input = login_form.find('input', {'name': '_csrf_token'})
+            if csrf_input:
+                csrf_token = csrf_input.get('value')
+                logger.debug("Token CSRF trouvé")
+            
+            # Préparer les données de login
             login_data = {
-                '_username': self.config.USERNAME,
-                '_password': self.config.PASSWORD
+                '_username': self.config.PADEL_USERNAME,
+                '_password': self.config.PADEL_PASSWORD
             }
+            if csrf_token:
+                login_data['_csrf_token'] = csrf_token
             
-            # Tentative de connexion
-            logger.info(f"Tentative de connexion pour l'utilisateur {self.config.USERNAME}...")
-            response = self.session.post(login_url, data=login_data)
+            # Envoyer le formulaire
+            login_response = self.session.post(self.config.LOGIN_URL, data=login_data)
+            login_response.raise_for_status()
             
             # Vérifier si la connexion a réussi
-            if response.status_code == 200 or response.status_code == 302:
-                if "/membre/accueil" in response.url:
-                    logger.info("Connexion réussie")
-                    return True
-                else:
-                    logger.error("Redirection inattendue après connexion")
-                    return False
+            if "membre/planning" in login_response.url or "Welcome" in login_response.text:
+                logger.info("Connexion réussie")
+                return True
             else:
-                logger.error(f"Échec de la connexion avec le code {response.status_code}")
+                logger.error(f"Échec de la connexion. URL de redirection : {login_response.url}")
                 return False
-                
+            
         except Exception as e:
             logger.error(f"Erreur lors de la connexion : {str(e)}")
             return False
@@ -254,6 +263,9 @@ class CourtChecker:
                 response = self.session.get(self.config.PLANNING_URL)
             
             response.raise_for_status()
+            logger.debug(f"URL finale du planning : {response.url}")
+            logger.debug("Contenu de la page de planning reçu")
+            
             soup = BeautifulSoup(response.text, 'html.parser')
             
             # Extraire toutes les URLs de planning disponibles
@@ -397,41 +409,53 @@ class CourtChecker:
     def _extract_date(self, soup: BeautifulSoup) -> str:
         """Extrait la date du planning"""
         try:
-            # Essayer différents sélecteurs possibles
+            # Essayer différents sélecteurs possibles pour trouver le titre
             selectors = [
                 '.table-planning--title',
                 '.planning--title',
-                'h2',  # Souvent utilisé pour les titres
-                '.title'
+                'h2',
+                '.title',
+                '.table-planning thead th',  # Nouveau sélecteur pour l'en-tête du tableau
+                'th.planning-title'  # Autre possibilité pour l'en-tête
             ]
             
+            # Liste des mois en français pour la détection
+            mois_fr = [
+                "janvier", "février", "mars", "avril", "mai", "juin",
+                "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+                "fevrier", "aout"  # Variantes sans accents
+            ]
+            
+            # D'abord, essayer les sélecteurs spécifiques
             for selector in selectors:
-                date_element = soup.select_one(selector)
-                if date_element:
-                    text = date_element.text.strip()
-                    
-                    # Si le texte contient "PLANNING" et une date, extraire la date
-                    if "PLANNING" in text.upper() and any(month in text.lower() for month in ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]):
-                        # Extraire la partie après "DU" ou juste prendre le texte si pas de "DU"
-                        if "DU" in text.upper():
-                            date_text = text.split("DU")[-1].strip()
-                        else:
-                            date_text = text.strip()
-                        return date_text
+                elements = soup.select(selector)
+                for element in elements:
+                    text = element.get_text().strip().lower()
+                    # Si le texte contient un mois français
+                    if any(mois in text for mois in mois_fr):
+                        logger.debug(f"Date trouvée avec le sélecteur {selector}: {text}")
+                        return text
             
-            # Si aucun sélecteur n'a fonctionné, chercher dans tout le texte
-            text = soup.get_text()
+            # Si rien n'a fonctionné, chercher dans tout le texte
+            full_text = soup.get_text().lower()
             
-            # Chercher un motif de date (ex: "lundi 06 janvier 2025")
-            import re
-            date_pattern = r'(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+\d{4}'
-            match = re.search(date_pattern, text, re.IGNORECASE)
+            # Chercher un motif de date (ex: "lundi 06 janvier 2025" ou "06 janvier 2025")
+            date_patterns = [
+                r'\d{1,2}\s+(?:' + '|'.join(mois_fr) + r')\s+\d{4}',  # 06 janvier 2025
+                r'(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+\d{1,2}\s+(?:' + '|'.join(mois_fr) + r')\s+\d{4}'  # lundi 06 janvier 2025
+            ]
             
-            if match:
-                date_text = match.group(0)
-                return date_text
-                
+            for pattern in date_patterns:
+                match = re.search(pattern, full_text)
+                if match:
+                    date_text = match.group(0)
+                    logger.debug(f"Date trouvée avec pattern dans le texte: {date_text}")
+                    return date_text
+            
+            # Si on arrive ici, aucune date n'a été trouvée
             logger.error("Aucune date trouvée dans la page")
+            logger.debug("Contenu de la page :")
+            logger.debug(full_text[:500])  # Log les 500 premiers caractères pour debug
             return ""
             
         except Exception as e:
