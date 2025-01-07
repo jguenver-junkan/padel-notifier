@@ -407,19 +407,29 @@ class CourtChecker:
             # Vérifier si ces créneaux sont nouveaux
             new_slots = []
             state_key = f"{target_time}|{planning_date}"
-            previous_state = self.previous_states.get(state_key, {})
             
-            for slot in available_slots:
-                if slot not in previous_state or previous_state[slot] != "libre":
+            # Créer la structure si elle n'existe pas
+            if state_key not in self.previous_states:
+                self.previous_states[state_key] = {}
+            
+            # Vérifier chaque créneau
+            current_state = {}
+            for slot in self._get_all_slots():
+                is_available = slot in available_slots
+                current_state[slot] = "libre" if is_available else "occupé"
+                
+                # Si le créneau est libre maintenant et était occupé avant (ou n'existait pas)
+                if is_available and (
+                    slot not in self.previous_states[state_key] or 
+                    self.previous_states[state_key][slot] == "occupé"
+                ):
                     new_slots.append((target_time, slot, planning_date))
-                    # Mettre à jour l'état
-                    if state_key not in self.previous_states:
-                        self.previous_states[state_key] = {}
-                    self.previous_states[state_key][slot] = "libre"
             
             # Sauvegarder le nouvel état
+            self.previous_states[state_key] = current_state
+            self._save_states(current_state, planning_date)
+            
             if new_slots:
-                self._save_states(self.previous_states[state_key], planning_date)
                 logger.info(f"Nouveaux créneaux disponibles pour {target_time} : {new_slots}")
             else:
                 logger.debug(f"Aucun nouveau créneau disponible pour {target_time}")
@@ -619,3 +629,7 @@ class CourtChecker:
         except ValueError as e:
             logger.error(f"Erreur lors de la conversion de la date '{date_text}': {str(e)}")
         return None
+
+    def _get_all_slots(self) -> List[str]:
+        """Retourne la liste de tous les terrains possibles"""
+        return [f"Padel {i}" for i in range(1, 5)]  # Padel 1 à 4
