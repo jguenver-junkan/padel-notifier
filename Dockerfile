@@ -26,21 +26,18 @@ WORKDIR /app
 # Créer le répertoire pour les données persistantes
 RUN mkdir -p /app/data
 
-# Créer les fichiers d'état vides dans le volume
-RUN echo "{}" > /app/data/court_states.json
-RUN echo "{}" > /app/data/known_dates.json
-
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Créer des liens symboliques vers le volume
-RUN ln -sf /app/data/court_states.json /app/court_states.json
-RUN ln -sf /app/data/known_dates.json /app/known_dates.json
-
 # Définir le volume
 VOLUME /app/data
 
-# Exécuter le script depuis le répertoire src
+# Script d'entrée pour initialiser les fichiers si nécessaire
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Utiliser le script d'entrée
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["python", "-m", "src.main"]

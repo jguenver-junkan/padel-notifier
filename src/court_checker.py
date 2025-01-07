@@ -137,14 +137,15 @@ class CourtChecker:
             logger.error(f"Erreur lors du chargement des états: {str(e)}")
             return {}
 
-    def _save_states(self, states: Dict, date: str):
+    def _save_states(self, states: Dict, state_key: str):
         """
         Sauvegarde l'état actuel dans le fichier JSON
         
         Args:
             states: Dict des états pour une date donnée
-            date: Date du planning (format: "YYYY-MM-DD")
+            state_key: Clé d'état (format: "HH:MM|YYYY-MM-DD")
         """
+        backup_file = f"{self.state_file}.bak"
         try:
             # Charger les états existants
             all_states = {}
@@ -154,18 +155,34 @@ class CourtChecker:
                     if content:
                         try:
                             all_states = json.loads(content)
+                            # Nettoyer les anciennes clés qui ne sont pas au format "HH:MM|YYYY-MM-DD"
+                            all_states = {k: v for k, v in all_states.items() if '|' in k}
                         except json.JSONDecodeError:
                             logger.warning("Erreur lors du chargement du fichier existant, création d'un nouveau")
                             all_states = {}
             
-            # Mettre à jour les états pour cette date
-            all_states[date] = states
+            # Mettre à jour les états pour cette clé
+            all_states[state_key] = states
             
-            # Supprimer les dates anciennes (garder seulement les 7 derniers jours)
-            all_states = dict(sorted(all_states.items())[-7:])
+            # Supprimer les états anciens (garder seulement les 7 derniers jours)
+            # Extraire les dates des clés (format: "HH:MM|YYYY-MM-DD")
+            dates = []
+            for key in all_states.keys():
+                try:
+                    date = key.split('|')[1]
+                    dates.append(date)
+                except (IndexError, Exception) as e:
+                    logger.warning(f"Clé invalide ignorée '{key}': {str(e)}")
+            
+            # Garder seulement les états des 7 derniers jours
+            if dates:
+                dates = sorted(set(dates))
+                if len(dates) > 7:
+                    dates_to_keep = dates[-7:]
+                    all_states = {k: v for k, v in all_states.items() 
+                                if k.split('|')[1] in dates_to_keep}
             
             # Sauvegarder avec un backup
-            backup_file = f"{self.state_file}.bak"
             if os.path.exists(self.state_file):
                 os.replace(self.state_file, backup_file)
             
@@ -463,7 +480,7 @@ class CourtChecker:
             
             # Sauvegarder le nouvel état
             self.previous_states[state_key] = current_state
-            self._save_states(current_state, planning_date)
+            self._save_states(current_state, state_key)
             
             if new_slots:
                 logger.info(f"Nouveaux créneaux disponibles pour {target_time} : {new_slots}")
