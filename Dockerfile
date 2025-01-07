@@ -20,10 +20,21 @@ RUN update-ca-certificates
 
 WORKDIR /app
 
+# Créer le répertoire pour les données persistantes
+RUN mkdir -p /app/data
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+
+# Déplacer les fichiers d'état dans le volume
+RUN mv court_states.json data/ || true
+RUN mv known_dates.json data/ || true
+
+# Créer des liens symboliques vers le volume
+RUN ln -sf /app/data/court_states.json /app/court_states.json
+RUN ln -sf /app/data/known_dates.json /app/known_dates.json
 
 # Exécuter le script depuis le répertoire src
 CMD ["python", "-m", "src.main"]
