@@ -25,9 +25,22 @@ class CourtChecker:
     def __init__(self, config):
         self.config = config
         self.session = requests.Session()
-        # Utiliser le répertoire data pour les fichiers d'état
-        self.state_file = os.path.join("/app/data", "court_states.json")
-        self.dates_file = os.path.join("/app/data", "known_dates.json")
+        
+        # Déterminer le répertoire de données selon l'environnement
+        if os.environ.get('DOCKER_ENV'):
+            data_dir = "/app/data"
+        else:
+            # En local, utiliser le répertoire courant
+            data_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            
+        # Créer le répertoire data en local si nécessaire
+        if not os.environ.get('DOCKER_ENV'):
+            os.makedirs(os.path.join(data_dir, "data"), exist_ok=True)
+            data_dir = os.path.join(data_dir, "data")
+        
+        # Configurer les chemins des fichiers
+        self.state_file = os.path.join(data_dir, "court_states.json")
+        self.dates_file = os.path.join(data_dir, "known_dates.json")
         self.known_dates = set()
         
         # S'assurer que les fichiers existent

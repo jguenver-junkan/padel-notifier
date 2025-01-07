@@ -18,6 +18,9 @@ ENV LC_ALL=fr_FR.UTF-8
 # Configuration des certificats SSL
 RUN update-ca-certificates
 
+# Définir la variable d'environnement pour Docker
+ENV DOCKER_ENV=1
+
 WORKDIR /app
 
 # Créer le répertoire pour les données persistantes
