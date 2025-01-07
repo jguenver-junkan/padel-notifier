@@ -29,6 +29,9 @@ class CourtChecker:
         self.dates_file = "known_dates.json"
         self.known_dates = set()
         
+        # S'assurer que les fichiers existent
+        self._ensure_files_exist()
+        
         # Charger l'état précédent ou créer un nouveau dictionnaire
         self.previous_states = self._load_states()
         
@@ -49,6 +52,42 @@ class CourtChecker:
             'Sec-Fetch-User': '?1',
             'Cache-Control': 'max-age=0'
         })
+
+    def _ensure_files_exist(self):
+        """S'assure que les fichiers d'état existent avec une structure valide"""
+        # Créer le fichier d'états s'il n'existe pas
+        if not os.path.exists(self.state_file):
+            logger.info("Création du fichier d'états")
+            with open(self.state_file, 'w') as f:
+                json.dump({}, f)
+        else:
+            # Vérifier que le contenu est valide
+            try:
+                with open(self.state_file, 'r') as f:
+                    content = f.read().strip()
+                    if content:  # Si le fichier n'est pas vide
+                        json.loads(content)  # Tester si c'est du JSON valide
+            except (json.JSONDecodeError, Exception) as e:
+                logger.warning(f"Fichier d'états corrompu, création d'un nouveau : {str(e)}")
+                with open(self.state_file, 'w') as f:
+                    json.dump({}, f)
+        
+        # Créer le fichier des dates connues s'il n'existe pas
+        if not os.path.exists(self.dates_file):
+            logger.info("Création du fichier des dates connues")
+            with open(self.dates_file, 'w') as f:
+                json.dump({}, f)
+        else:
+            # Vérifier que le contenu est valide
+            try:
+                with open(self.dates_file, 'r') as f:
+                    content = f.read().strip()
+                    if content:  # Si le fichier n'est pas vide
+                        json.loads(content)  # Tester si c'est du JSON valide
+            except (json.JSONDecodeError, Exception) as e:
+                logger.warning(f"Fichier des dates corrompu, création d'un nouveau : {str(e)}")
+                with open(self.dates_file, 'w') as f:
+                    json.dump({}, f)
 
     def _load_states(self) -> Dict:
         """
