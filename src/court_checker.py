@@ -55,12 +55,9 @@ class CourtChecker:
         Charge l'état précédent depuis le fichier JSON
         Format du dictionnaire:
         {
-            "2025-01-06": {
-                "11H00|Padel 1": "libre",
-                "11H00|Padel 2": "occupé",
-                ...
-            },
-            "2025-01-07": {
+            "11H00|2025-01-06": {
+                "Padel 1": "libre",
+                "Padel 2": "occupé",
                 ...
             }
         }
@@ -78,18 +75,7 @@ class CourtChecker:
                     logger.info("Fichier d'états vide, initialisation avec un dictionnaire vide")
                     return {}
                 try:
-                    saved_states = json.loads(content)
-                    if not isinstance(saved_states, dict):
-                        logger.warning("Le fichier d'états n'est pas au bon format, création d'un nouveau")
-                        return {}
-                    # Convertir les états pour chaque date
-                    converted_states = {}
-                    for date, states in saved_states.items():
-                        if isinstance(states, dict):  # Vérifier que states est bien un dictionnaire
-                            converted_states[date] = {
-                                tuple(k.split('|')): v for k, v in states.items()
-                            }
-                    return converted_states
+                    return json.loads(content)
                 except json.JSONDecodeError as e:
                     logger.error(f"Erreur de décodage JSON: {str(e)}")
                     return {}
@@ -119,11 +105,8 @@ class CourtChecker:
                             logger.warning("Erreur lors du chargement du fichier existant, création d'un nouveau")
                             all_states = {}
             
-            # Convertir les tuples en chaînes pour le JSON
-            states_to_save = {f"{k[0]}|{k[1]}": v for k, v in states.items()}
-            
             # Mettre à jour les états pour cette date
-            all_states[date] = states_to_save
+            all_states[date] = states
             
             # Supprimer les dates anciennes (garder seulement les 7 derniers jours)
             all_states = dict(sorted(all_states.items())[-7:])
