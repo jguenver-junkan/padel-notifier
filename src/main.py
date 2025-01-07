@@ -28,7 +28,36 @@ def check_and_notify():
         # Si des créneaux sont disponibles, envoyer une notification
         if available_slots:
             logger.info(f"Créneaux disponibles trouvés : {available_slots}")
-            notifier.send_notification(available_slots)
+            
+            # Formater le message
+            message = "Nouveaux créneaux disponibles :\n\n"
+            # Grouper par date
+            slots_by_date = {}
+            for time, court, date in available_slots:
+                if date not in slots_by_date:
+                    slots_by_date[date] = []
+                slots_by_date[date].append((time, court))
+            
+            # Formater le message par date
+            for date in sorted(slots_by_date.keys()):
+                message += f"\nLe {date} :\n"
+                # Grouper par heure
+                slots_by_time = {}
+                for time, court in slots_by_date[date]:
+                    if time not in slots_by_time:
+                        slots_by_time[time] = []
+                    slots_by_time[time].append(court)
+                
+                # Ajouter les créneaux par heure
+                for time in sorted(slots_by_time.keys()):
+                    courts = sorted(slots_by_time[time])
+                    message += f"- {time} : {', '.join(courts)}\n"
+            
+            # Envoyer la notification
+            notifier.send_notification(
+                subject="Créneaux de Padel disponibles !",
+                message=message
+            )
         else:
             logger.info("Aucun créneau disponible")
 
