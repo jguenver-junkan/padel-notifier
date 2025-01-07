@@ -25,8 +25,9 @@ class CourtChecker:
     def __init__(self, config):
         self.config = config
         self.session = requests.Session()
-        self.state_file = "court_states.json"
-        self.dates_file = "known_dates.json"
+        # Utiliser le répertoire data pour les fichiers d'état
+        self.state_file = os.path.join("/app/data", "court_states.json")
+        self.dates_file = os.path.join("/app/data", "known_dates.json")
         self.known_dates = set()
         
         # S'assurer que les fichiers existent
