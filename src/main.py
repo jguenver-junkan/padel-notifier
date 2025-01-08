@@ -13,6 +13,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def format_date(date_str):
+    """
+    Convertit une date du format YYYY-MM-DD au format DD/MM/YYYY
+    """
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+    return date_obj.strftime("%d/%m/%Y")
+
 def check_and_notify():
     """
     Fonction principale qui vérifie les disponibilités et envoie les notifications
@@ -28,12 +35,18 @@ def check_and_notify():
         # Notifier les nouvelles dates
         if new_dates:
             logger.info(f"Nouvelles dates trouvées : {new_dates}")
-            message = "Nouvelles dates disponibles :\n\n"
+            message = "Bonjour !\n\n"
+            message += "De nouvelles dates sont disponibles pour réserver un terrain de Padel :\n"
+            message += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             for date in sorted(new_dates):
-                message += f"- {date}\n"
+                message += f"📅  {format_date(date)}\n"
+            
+            message += "\n✨ N'oubliez pas de réserver rapidement pour avoir le meilleur choix d'horaires !\n"
+            message += f"\n🔗 Accéder au planning : <a href='{config.PLANNING_URL}'>{config.PLANNING_URL}</a>\n"
+            message += "\nBonne journée ! 🌟"
             
             notifier.send_notification(
-                subject="Nouvelles dates de Padel disponibles !",
+                subject="[WTC] - 📅 NOUVELLES DATES Planning 📅",
                 message=message
             )
             logger.info("Notification envoyée pour les nouvelles dates")
@@ -43,7 +56,10 @@ def check_and_notify():
             logger.info(f"Nouveaux créneaux disponibles trouvés : {available_slots}")
             
             # Formater le message
-            message = "Nouveaux créneaux disponibles :\n\n"
+            message = "Bonjour !\n\n"
+            message += "De nouveaux créneaux se sont libérés :\n"
+            message += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            
             # Grouper par date
             slots_by_date = {}
             for time, court, date in available_slots:
@@ -62,7 +78,7 @@ def check_and_notify():
             
             # Formater le message par date
             for date in sorted(slots_by_date.keys()):
-                message += f"\nLe {date} :\n"
+                message += f"📅  {format_date(date)} :\n"
                 # Grouper par heure
                 slots_by_time = {}
                 for time, court in slots_by_date[date]:
@@ -73,11 +89,16 @@ def check_and_notify():
                 # Ajouter les créneaux par heure
                 for time in sorted(slots_by_time.keys()):
                     courts = sorted(slots_by_time[time])
-                    message += f"- {time} : {', '.join(courts)}\n"
+                    message += f"   ⏰ {time} : Terrain{'s' if len(courts) > 1 else ''} {', '.join(courts)}\n"
+                message += "\n"
+            
+            message += "✨ Réservez vite avant que ces créneaux ne soient pris !\n"
+            message += f"\n🔗 Accéder au planning : <a href='{config.PLANNING_URL}'>{config.PLANNING_URL}</a>\n"
+            message += "\nBonne journée ! 🌟"
             
             # Envoyer la notification
             notifier.send_notification(
-                subject="Nouveaux créneaux de Padel disponibles !",
+                subject="[WTC] - 🎾 Créneaux Padel disponibles ! 🎾",
                 message=message
             )
             logger.info("Notification envoyée pour les nouveaux créneaux")
