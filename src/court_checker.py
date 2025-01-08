@@ -147,47 +147,27 @@ class CourtChecker:
         """
         backup_file = f"{self.state_file}.bak"
         try:
-            # Charger les états existants
-            all_states = {}
-            if os.path.exists(self.state_file):
-                with open(self.state_file, 'r') as f:
-                    content = f.read().strip()
-                    if content:
-                        try:
-                            all_states = json.loads(content)
-                            # Nettoyer les anciennes clés qui ne sont pas au format "HH:MM|YYYY-MM-DD"
-                            all_states = {k: v for k, v in all_states.items() if '|' in k}
-                        except json.JSONDecodeError:
-                            logger.warning("Erreur lors du chargement du fichier existant, création d'un nouveau")
-                            all_states = {}
-            
             # Mettre à jour les états pour cette clé
-            all_states[state_key] = states
+            self.previous_states[state_key] = states
             
-            # Supprimer les états anciens (garder seulement les 7 derniers jours)
-            # Extraire les dates des clés (format: "HH:MM|YYYY-MM-DD")
-            dates = []
-            for key in all_states.keys():
-                try:
-                    date = key.split('|')[1]
-                    dates.append(date)
-                except (IndexError, Exception) as e:
-                    logger.warning(f"Clé invalide ignorée '{key}': {str(e)}")
+            # Nettoyer les anciennes clés qui ne sont pas au format "HH:MM|YYYY-MM-DD"
+            self.previous_states = {k: v for k, v in self.previous_states.items() if '|' in k}
             
-            # Garder seulement les états des 7 derniers jours
-            if dates:
-                dates = sorted(set(dates))
-                if len(dates) > 7:
-                    dates_to_keep = dates[-7:]
-                    all_states = {k: v for k, v in all_states.items() 
-                                if k.split('|')[1] in dates_to_keep}
+            # Supprimer les états anciens (garder seulement les dates futures)
+            today = datetime.now().strftime('%Y-%m-%d')
+            
+            # Garder seulement les états des dates futures ou d'aujourd'hui
+            self.previous_states = {
+                k: v for k, v in self.previous_states.items()
+                if k.split('|')[1] >= today  # Comparer les dates au format YYYY-MM-DD
+            }
             
             # Sauvegarder avec un backup
             if os.path.exists(self.state_file):
                 os.replace(self.state_file, backup_file)
             
             with open(self.state_file, 'w') as f:
-                json.dump(all_states, f, indent=2)
+                json.dump(self.previous_states, f, indent=2)
                 
             # Si tout s'est bien passé, supprimer le backup
             if os.path.exists(backup_file):
@@ -378,6 +358,23 @@ class CourtChecker:
             # Parser la page
             soup = BeautifulSoup(response.text, 'html.parser')
             
+            # Extraire la date du jour depuis la page principale
+            today_text = self._extract_date(soup)
+            if today_text:
+                today_date = self._convert_date_to_iso(today_text)
+                if today_date:
+                    all_dates.add(today_date)
+                    logger.info(f"Date du jour : {today_date}")
+                    
+                    # Vérifier les disponibilités pour la date du jour
+                    for target_time in target_times:
+                        logger.info(f"Vérification des disponibilités pour {target_time}...")
+                        available_slots = self.check_availability(target_time, today_date)
+                        if available_slots:
+                            all_available_slots.extend(available_slots)
+                            if today_date not in self.known_dates:
+                                new_dates_found.append(today_date)
+            
             # Obtenir toutes les URLs de planning disponibles
             planning_urls = self._get_planning_urls(soup)
             
@@ -386,6 +383,10 @@ class CourtChecker:
                 # Extraire la date de l'URL
                 date = self._extract_date_from_url(url)
                 if not date:
+                    continue
+                
+                # Ne pas revérifier la date du jour
+                if date == today_date:
                     continue
                 
                 logger.info(f"Vérification du planning pour le {date}")
@@ -411,6 +412,47 @@ class CourtChecker:
         except Exception as e:
             logger.error(f"Erreur lors de la vérification des dates : {str(e)}")
             return [], []
+
+    def _get_all_times(self, soup: BeautifulSoup) -> List[str]:
+        """Retourne la liste de tous les horaires du planning"""
+        times = []
+        planning_table = soup.find('table', {'class': 'table-planning'})
+        if not planning_table:
+            return times
+            
+        # Récupérer toutes les cellules d'horaire
+        for row in planning_table.find_all('tr'):
+            time_cell = row.select_one('th')
+            if not time_cell:
+                continue
+                
+            time = time_cell.text.strip()
+            if time and time != "Horaires":  # Ignorer l'en-tête
+                times.append(time)
+                
+        return times
+
+    def _find_available_slots_for_time(self, row) -> Tuple[List[str], Dict[str, str]]:
+        """
+        Trouve les créneaux disponibles pour une ligne donnée
+        
+        Returns:
+            Tuple[List[str], Dict[str, str]]: (créneaux disponibles, état de tous les terrains)
+        """
+        available_slots = []
+        current_state = {}
+        
+        courts = row.select('td')
+        for i, court in enumerate(courts, 1):
+            court_name = f"Padel {i}"
+            court_classes = court.get('class', [])
+            is_available = self._is_court_available(court_classes)
+            
+            current_state[court_name] = "libre" if is_available else "occupé"
+            if is_available:
+                available_slots.append(court_name)
+                
+        return available_slots, current_state
 
     def check_availability(self, target_time: str = None, planning_date: Optional[str] = None) -> List[Tuple[str, str, str]]:
         """
@@ -450,50 +492,61 @@ class CourtChecker:
             # Parser le HTML
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Extraire la date du planning
-            date_text = self._extract_date(soup)
-            if not date_text:
-                logger.error("Impossible de trouver la date du planning")
-                return []
-            
-            # Convertir la date en format YYYY-MM-DD
-            planning_date = self._convert_date_to_iso(date_text)
+            # Si la date n'est pas fournie, l'extraire du HTML
             if not planning_date:
-                return []
+                date_text = self._extract_date(soup)
+                if not date_text:
+                    logger.error("Impossible de trouver la date du planning")
+                    return []
+                planning_date = self._convert_date_to_iso(date_text)
+                if not planning_date:
+                    return []
             
-            logger.info(f"Date du planning : {date_text} ({planning_date})")
+            logger.info(f"Vérification du planning pour le {planning_date}")
             
             # Si aucun horaire n'est spécifié, utiliser celui de la config
             if not target_time:
                 target_time = self.config.TARGET_TIME
             
-            # Trouver les créneaux disponibles
-            available_slots = self._find_available_slots(soup, target_time)
+            # Trouver la table qui contient les créneaux
+            planning_table = soup.find('table', {'class': 'table-planning'})
+            if not planning_table:
+                logger.error("Page de planning non trouvée")
+                return []
             
-            # Vérifier si ces créneaux sont nouveaux
+            # Parcourir toutes les lignes pour sauvegarder tous les états
             new_slots = []
-            state_key = f"{target_time}|{planning_date}"
+            rows = planning_table.find_all('tr')
             
-            # Créer la structure si elle n'existe pas
-            if state_key not in self.previous_states:
-                self.previous_states[state_key] = {}
-            
-            # Vérifier chaque créneau
-            current_state = {}
-            for slot in self._get_all_slots():
-                is_available = slot in available_slots
-                current_state[slot] = "libre" if is_available else "occupé"
+            for row in rows:
+                time_cell = row.select_one('th')
+                if not time_cell:
+                    continue
+                    
+                current_time = time_cell.text.strip()
+                if not current_time or current_time == "Horaires":
+                    continue
                 
-                # Si le créneau est libre maintenant et était occupé avant (ou n'existait pas)
-                if is_available and (
-                    slot not in self.previous_states[state_key] or 
-                    self.previous_states[state_key][slot] == "occupé"
-                ):
-                    new_slots.append((target_time, slot, planning_date))
-            
-            # Sauvegarder le nouvel état
-            self.previous_states[state_key] = current_state
-            self._save_states(current_state, state_key)
+                # Trouver les créneaux disponibles et l'état actuel pour cet horaire
+                available_slots, current_state = self._find_available_slots_for_time(row)
+                
+                # Sauvegarder l'état pour cet horaire
+                state_key = f"{current_time}|{planning_date}"
+                if state_key not in self.previous_states:
+                    self.previous_states[state_key] = {}
+                
+                # Si c'est l'horaire cible, vérifier les nouveaux créneaux disponibles
+                if current_time == target_time:
+                    for slot in available_slots:
+                        if (
+                            slot not in self.previous_states[state_key] or 
+                            self.previous_states[state_key][slot] == "occupé"
+                        ):
+                            new_slots.append((target_time, slot, planning_date))
+                
+                # Mettre à jour et sauvegarder l'état
+                self.previous_states[state_key] = current_state
+                self._save_states(current_state, state_key)
             
             if new_slots:
                 logger.info(f"Nouveaux créneaux disponibles pour {target_time} : {new_slots}")
@@ -502,7 +555,7 @@ class CourtChecker:
             
             return new_slots
             
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             logger.error(f"Erreur lors de la vérification des disponibilités : {str(e)}")
             return []
 
