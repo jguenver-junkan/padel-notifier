@@ -103,38 +103,20 @@ class CourtChecker:
                 with open(self.dates_file, 'w') as f:
                     json.dump({}, f)
 
-    def _load_states(self) -> Dict:
+    def _load_states(self) -> Dict[str, Dict[str, str]]:
         """
-        Charge l'état précédent depuis le fichier JSON
-        Format du dictionnaire:
-        {
-            "11H00|2025-01-06": {
-                "Padel 1": "libre",
-                "Padel 2": "occupé",
-                ...
-            }
-        }
+        Charge l'état des créneaux depuis le fichier JSON
+        
+        Returns:
+            Dict[str, Dict[str, str]]: État des créneaux
         """
         try:
-            if not os.path.exists(self.state_file):
-                logger.info("Fichier d'états non trouvé, création d'un nouveau fichier")
-                with open(self.state_file, 'w') as f:
-                    json.dump({}, f)
-                return {}
-                
-            with open(self.state_file, 'r') as f:
-                content = f.read().strip()
-                if not content:  # Si le fichier est vide
-                    logger.info("Fichier d'états vide, initialisation avec un dictionnaire vide")
-                    return {}
-                try:
-                    return json.loads(content)
-                except json.JSONDecodeError as e:
-                    logger.error(f"Erreur de décodage JSON: {str(e)}")
-                    return {}
-            
+            if os.path.exists(self.state_file):
+                with open(self.state_file, 'r') as f:
+                    return json.load(f)
+            return {}
         except Exception as e:
-            logger.error(f"Erreur lors du chargement des états: {str(e)}")
+            logger.error(f"Erreur lors du chargement des états : {str(e)}")
             return {}
 
     def _save_states(self, states: Dict, state_key: str):
@@ -174,7 +156,7 @@ class CourtChecker:
                 os.remove(backup_file)
                 
         except Exception as e:
-            logger.error(f"Erreur lors de la sauvegarde des états: {str(e)}")
+            logger.error(f"Erreur lors de la sauvegarde des états : {str(e)}")
             # En cas d'erreur, restaurer le backup si disponible
             if os.path.exists(backup_file):
                 os.replace(backup_file, self.state_file)
@@ -204,7 +186,7 @@ class CourtChecker:
                     self.known_dates.update(month_dates)
                 return dates_by_month
         except Exception as e:
-            logger.error(f"Erreur lors du chargement des dates connues: {str(e)}")
+            logger.error(f"Erreur lors du chargement des dates connues : {str(e)}")
             return {}
 
     def _save_known_dates(self, dates: List[str]):
@@ -243,7 +225,7 @@ class CourtChecker:
                 os.remove(backup_file)
                 
         except Exception as e:
-            logger.error(f"Erreur lors de la sauvegarde des dates connues: {str(e)}")
+            logger.error(f"Erreur lors de la sauvegarde des dates connues : {str(e)}")
             # En cas d'erreur, restaurer le backup si disponible
             if os.path.exists(backup_file):
                 os.replace(backup_file, self.dates_file)
@@ -468,6 +450,9 @@ class CourtChecker:
                                        Ne contient que les terrains nouvellement disponibles
         """
         try:
+            # Recharger l'état depuis le fichier
+            self.previous_states = self._load_states()
+            
             # Construire l'URL avec la date si fournie
             url = self.config.PLANNING_URL
             if planning_date:
@@ -518,6 +503,10 @@ class CourtChecker:
             new_slots = []
             rows = planning_table.find_all('tr')
             
+            # Stocker tous les états du site web
+            web_states = {}
+            
+            # Première passe : récupérer tous les états du site web
             for row in rows:
                 time_cell = row.select_one('th')
                 if not time_cell:
@@ -529,29 +518,40 @@ class CourtChecker:
                 
                 # Trouver les créneaux disponibles et l'état actuel pour cet horaire
                 available_slots, current_state = self._find_available_slots_for_time(row)
-                
-                # Sauvegarder l'état pour cet horaire
                 state_key = f"{current_time}|{planning_date}"
+                web_states[state_key] = current_state
+            
+            # Deuxième passe : comparer avec les états précédents et mettre à jour
+            for state_key, web_state in web_states.items():
+                current_time = state_key.split('|')[0]
+                
+                # Si c'est l'horaire cible, vérifier les créneaux qui passent de occupé à libre
+                if current_time == target_time:
+                    # Si nous avons un état précédent
+                    if state_key in self.previous_states:
+                        for court, web_status in web_state.items():
+                            # Si le créneau est libre sur le site web
+                            if web_status == "libre":
+                                # Et qu'il était occupé dans l'état précédent
+                                if (
+                                    court in self.previous_states[state_key] and
+                                    self.previous_states[state_key][court] == "occupé"
+                                ):
+                                    new_slots.append((target_time, court, planning_date))
+                                    logger.info(f"Créneau libéré : {court} à {target_time} le {planning_date}")
+                                    logger.info(f"État précédent : {self.previous_states[state_key][court]}")
+                                    logger.info(f"Nouvel état : {web_status}")
+                
+                # Mettre à jour l'état avec celui du site web
                 if state_key not in self.previous_states:
                     self.previous_states[state_key] = {}
-                
-                # Si c'est l'horaire cible, vérifier les nouveaux créneaux disponibles
-                if current_time == target_time:
-                    for slot in available_slots:
-                        if (
-                            slot not in self.previous_states[state_key] or 
-                            self.previous_states[state_key][slot] == "occupé"
-                        ):
-                            new_slots.append((target_time, slot, planning_date))
-                
-                # Mettre à jour et sauvegarder l'état
-                self.previous_states[state_key] = current_state
-                self._save_states(current_state, state_key)
+                self.previous_states[state_key] = web_state
+                self._save_states(web_state, state_key)
             
             if new_slots:
-                logger.info(f"Nouveaux créneaux disponibles pour {target_time} : {new_slots}")
+                logger.info(f"Créneaux libérés pour {target_time} : {new_slots}")
             else:
-                logger.debug(f"Aucun nouveau créneau disponible pour {target_time}")
+                logger.debug(f"Aucun créneau libéré pour {target_time}")
             
             return new_slots
             
