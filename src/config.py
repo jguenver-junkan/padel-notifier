@@ -15,11 +15,14 @@ class Config:
     PLANNING_URL = os.getenv('PLANNING_URL')
 
     # Notification settings
-    EMAIL_TO = os.getenv('NOTIFICATION_EMAIL')
-    SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
-    SMTP_PORT = int(os.getenv('SMTP_PORT', 587))
-    SMTP_USERNAME = os.getenv('SMTP_USERNAME')
-    SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
+    def __init__(self):
+        notification_emails = os.getenv('NOTIFICATION_EMAIL', '')
+        self.EMAIL_TO = [email.strip() for email in notification_emails.split(',') if email.strip()]
+        print(f"Emails configurés : {self.EMAIL_TO}")  # Debug temporaire
+        self.SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+        self.SMTP_PORT = int(os.getenv('SMTP_PORT', 587))
+        self.SMTP_USERNAME = os.getenv('SMTP_USERNAME')
+        self.SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
 
     # Monitoring settings
     TARGET_TIMES = [
@@ -32,7 +35,7 @@ class Config:
     def validate(cls):
         required_vars = [
             'USERNAME', 'PASSWORD', 'SITE_URL', 'LOGIN_URL', 'PLANNING_URL',
-            'EMAIL_TO', 'SMTP_USERNAME', 'SMTP_PASSWORD'
+            'SMTP_USERNAME', 'SMTP_PASSWORD'
         ]
         
         missing = [var for var in required_vars if not getattr(cls, var)]
