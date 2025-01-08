@@ -330,6 +330,13 @@ class CourtChecker:
         all_dates = set()  # Pour stocker toutes les dates trouvées
         
         try:
+            # Recharger les dates connues depuis le fichier
+            known_dates = self._load_known_dates()
+            self.known_dates = set()
+            for month_dates in known_dates.values():
+                self.known_dates.update(month_dates)
+            logger.info(f"Dates connues rechargées : {sorted(list(self.known_dates))}")
+            
             # Se connecter si nécessaire
             self._login()
             
@@ -348,14 +355,17 @@ class CourtChecker:
                     all_dates.add(today_date)
                     logger.info(f"Date du jour : {today_date}")
                     
+                    # Vérifier si c'est une nouvelle date
+                    if today_date not in self.known_dates:
+                        new_dates_found.append(today_date)
+                        logger.info(f"Nouvelle date trouvée : {today_date}")
+                    
                     # Vérifier les disponibilités pour la date du jour
                     for target_time in target_times:
                         logger.info(f"Vérification des disponibilités pour {target_time}...")
                         available_slots = self.check_availability(target_time, today_date)
                         if available_slots:
                             all_available_slots.extend(available_slots)
-                            if today_date not in self.known_dates:
-                                new_dates_found.append(today_date)
             
             # Obtenir toutes les URLs de planning disponibles
             planning_urls = self._get_planning_urls(soup)
@@ -374,14 +384,17 @@ class CourtChecker:
                 logger.info(f"Vérification du planning pour le {date}")
                 all_dates.add(date)  # Ajouter la date à l'ensemble des dates trouvées
                 
+                # Vérifier si c'est une nouvelle date
+                if date not in self.known_dates:
+                    new_dates_found.append(date)
+                    logger.info(f"Nouvelle date trouvée : {date}")
+                
                 # Pour chaque horaire cible
                 for target_time in target_times:
                     logger.info(f"Vérification des disponibilités pour {target_time}...")
                     available_slots = self.check_availability(target_time, date)
                     if available_slots:
                         all_available_slots.extend(available_slots)
-                        if date not in self.known_dates:
-                            new_dates_found.append(date)
             
             # Sauvegarder toutes les dates trouvées
             if all_dates:

@@ -25,6 +25,19 @@ def check_and_notify():
         # Vérifier les disponibilités
         available_slots, new_dates = checker.check_all_dates()
         
+        # Notifier les nouvelles dates
+        if new_dates:
+            logger.info(f"Nouvelles dates trouvées : {new_dates}")
+            message = "Nouvelles dates disponibles :\n\n"
+            for date in sorted(new_dates):
+                message += f"- {date}\n"
+            
+            notifier.send_notification(
+                subject="Nouvelles dates de Padel disponibles !",
+                message=message
+            )
+            logger.info("Notification envoyée pour les nouvelles dates")
+        
         # Ne notifier que s'il y a de NOUVEAUX créneaux disponibles
         if available_slots and any(slot[0] in config.TARGET_TIMES for slot in available_slots):
             logger.info(f"Nouveaux créneaux disponibles trouvés : {available_slots}")
