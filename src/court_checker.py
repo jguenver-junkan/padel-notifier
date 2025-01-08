@@ -217,7 +217,12 @@ class CourtChecker:
                 content = f.read().strip()
                 if not content:
                     return {}
-                return json.loads(content)
+                dates_by_month = json.loads(content)
+                # Mettre à jour self.known_dates avec toutes les dates
+                self.known_dates = set()
+                for month_dates in dates_by_month.values():
+                    self.known_dates.update(month_dates)
+                return dates_by_month
         except Exception as e:
             logger.error(f"Erreur lors du chargement des dates connues: {str(e)}")
             return {}
@@ -230,9 +235,12 @@ class CourtChecker:
             dates: Liste des dates au format "YYYY-MM-DD"
         """
         try:
+            # Mettre à jour self.known_dates
+            self.known_dates.update(dates)
+            
             # Organiser les dates par mois
             dates_by_month = {}
-            for date in dates:
+            for date in self.known_dates:  # Utiliser toutes les dates connues
                 month = date[:7]  # "YYYY-MM"
                 if month not in dates_by_month:
                     dates_by_month[month] = []
@@ -250,11 +258,13 @@ class CourtChecker:
             with open(self.dates_file, 'w') as f:
                 json.dump(dates_by_month, f, indent=2)
                 
+            # Si tout s'est bien passé, supprimer le backup
             if os.path.exists(backup_file):
                 os.remove(backup_file)
                 
         except Exception as e:
             logger.error(f"Erreur lors de la sauvegarde des dates connues: {str(e)}")
+            # En cas d'erreur, restaurer le backup si disponible
             if os.path.exists(backup_file):
                 os.replace(backup_file, self.dates_file)
 
@@ -355,6 +365,7 @@ class CourtChecker:
             
         all_available_slots = []
         new_dates_found = []
+        all_dates = set()  # Pour stocker toutes les dates trouvées
         
         try:
             # Se connecter si nécessaire
@@ -378,6 +389,7 @@ class CourtChecker:
                     continue
                 
                 logger.info(f"Vérification du planning pour le {date}")
+                all_dates.add(date)  # Ajouter la date à l'ensemble des dates trouvées
                 
                 # Pour chaque horaire cible
                 for target_time in target_times:
@@ -387,11 +399,12 @@ class CourtChecker:
                         all_available_slots.extend(available_slots)
                         if date not in self.known_dates:
                             new_dates_found.append(date)
-                            self.known_dates.add(date)
             
-            # Sauvegarder les nouvelles dates
-            if new_dates_found:
-                self._save_known_dates(list(self.known_dates))
+            # Sauvegarder toutes les dates trouvées
+            if all_dates:
+                logger.info(f"Dates trouvées : {sorted(list(all_dates))}")
+                self._save_known_dates(list(all_dates))  # Sauvegarder toutes les dates
+                self.known_dates.update(all_dates)  # Mettre à jour self.known_dates avec toutes les dates
             
             return all_available_slots, new_dates_found
             
@@ -574,48 +587,42 @@ class CourtChecker:
         """
         urls = []
         try:
-            # Toujours inclure l'URL principale en premier
-            urls.append(self.config.PLANNING_URL)
-            
-            # Trouver tous les liens qui pourraient être des dates futures
-            links = soup.find_all('a', href=True)
-            latest_date = None
+            # Trouver la liste des dates
+            dates_list = soup.find('ul', class_='planning--dates')
+            if not dates_list:
+                logger.warning("Liste des dates non trouvée")
+                return [self.config.PLANNING_URL]
+
+            # Trouver tous les liens de dates
+            date_links = dates_list.find_all('a', class_='planning--header--date')
             
             # Log pour le debug
-            logger.debug(f"Nombre total de liens trouvés : {len(links)}")
-            for link in links:
+            logger.debug(f"Nombre de liens de dates trouvés : {len(date_links)}")
+            
+            for link in date_links:
                 href = link.get('href', '')
-                logger.debug(f"Analyse du lien : {href}")
-                # Ne garder que les URLs de planning (pas les URLs de réservation)
-                if '/membre/planning/6' in href and 'reserver' not in href:
-                    full_url = urljoin(self.config.SITE_URL, href)
-                    if full_url not in urls:
-                        urls.append(full_url)
-                        # Extraire la date pour trouver la plus récente
-                        date_match = re.search(r'date=(\d{2}-\d{2}-\d{4})', href)
-                        if date_match:
-                            date_str = date_match.group(1)
-                            try:
-                                current_date = datetime.strptime(date_str, '%d-%m-%Y')
-                                if not latest_date or current_date > latest_date:
-                                    latest_date = current_date
-                                logger.debug(f"Date trouvée dans l'URL : {date_str}")
-                            except ValueError:
-                                continue
+                logger.debug(f"Analyse du lien de date : {href}")
+                
+                # Construire l'URL complète
+                full_url = urljoin(self.config.SITE_URL, href)
+                if full_url not in urls:
+                    urls.append(full_url)
+                    # Extraire la date pour le logging
+                    date_match = re.search(r'date=(\d{2}-\d{2}-\d{4})', href)
+                    if date_match:
+                        date_str = date_match.group(1)
+                        logger.debug(f"Date trouvée dans l'URL : {date_str}")
             
             if not urls:
                 logger.warning("Aucune URL de planning trouvée")
-            else:
-                if latest_date:
-                    logger.info(f"URLs de planning trouvées : {len(urls)}, dernière date disponible : {latest_date.strftime('%d/%m/%Y')}")
-                else:
-                    logger.info(f"URLs de planning trouvées : {len(urls)}")
+                return [self.config.PLANNING_URL]
             
+            logger.info(f"URLs de planning trouvées : {len(urls)}")
             return urls
             
         except Exception as e:
             logger.error(f"Erreur lors de l'extraction des URLs de planning : {str(e)}")
-            return urls
+            return [self.config.PLANNING_URL]  # Retourner au moins l'URL principale en cas d'erreur
 
     def _extract_date_from_url(self, url: str) -> str:
         """Extrait la date d'une URL de planning"""
